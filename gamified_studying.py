@@ -1,6 +1,7 @@
 import os, json, sys
 
 level = 1
+health = 5
 gold = 0
 courses = []
 
@@ -43,6 +44,7 @@ def character_customisation():
                         file.write(f"Name: {name}\n")
                         file.write(f"Class: {char_class}\n")
                         file.write(f"Level: {level}\n")
+                        file.write(f"Health: {health}\n")
                         file.write(f"Gold: {gold}\n")
                         file.write(f"Courses: {courses}")
                         new_player = True
@@ -145,7 +147,9 @@ def quiz(new_player):
     print()
     if new_player:
         print("This is the Dungeons.\n Here you can take quizzes on certain subjects and level up.\nTry it.")
-    print("blah")
+    # malevolent mines of mathematics - chand devil, prasmadeus, nguimp, tran, yakob, gilled devil, kumar, jenkins
+    # english - deligorgon, demogounder, usel, alexakis, lambkin,
+    print("[A] Descend into the Malevolent Mines of Mathematics\n[B] x x of English\n[C] Fantastical Forest of Physics\n[D] x x of Legal")
 
 def shop(new_player):
     print()
@@ -155,7 +159,7 @@ def shop(new_player):
     
 def quit_program():
     print()
-    confirmation = input("[Y/N] Are you sure you want to quit? ").upper
+    confirmation = input("[Y/N] Are you sure you want to quit? ").upper()
     if confirmation == "Y":
         sys.exit()
 
