@@ -101,10 +101,11 @@ def note_revision(subject):
     print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
     option = input("What would you like to do? ").upper()
     if option == "A":
-        with open(filename, "r") as file:
-            note_dict = json.load(file)
-        for concept in note_dict:
-            print(f"- {concept}: {note_dict[concept]}")
+            with open(filename, "r") as file:
+                if os.path.getsize(filename) > 0 :
+                    note_dict = json.load(file)
+                    for concept in note_dict:
+                        print(f"- {concept}: {note_dict[concept]}")
     elif option == "B":
         concept = input(f"Key concept for {subject}: ").strip()
         concept_notes = input("Notes for concept: ").strip()
