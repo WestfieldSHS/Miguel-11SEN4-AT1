@@ -1,5 +1,0 @@
-Name: Miguel
-Class: Bard
-Level: 1
-Gold: 0
-Courses: ['Maths', 'English', 'Physics']

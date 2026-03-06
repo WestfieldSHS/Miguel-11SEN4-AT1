@@ -1,4 +1,4 @@
-import os
+import os, json
 
 level = 1
 gold = 0
@@ -11,7 +11,7 @@ def main():
 def character_customisation():
     global level, gold, courses
     file_name = "player_stats.txt"
-    filepath = file_creator(file_name)
+    filepath = filepath_finder(file_name)
     try:
         with open(filepath, "x"):
             print("No save file found. Creating one now...")
@@ -48,7 +48,7 @@ def character_customisation():
                         new_player = True
                         return name, char_class, new_player
 
-def file_creator(file_name):
+def filepath_finder(file_name):
     script_dir = os.path.dirname(os.path.abspath(__file__)) #finds the filepath to this python file by finding the directory of the asbolute path.
     filepath = os.path.join(script_dir, file_name) #uses script_dir to make the files save to same location.
     return filepath
@@ -60,7 +60,7 @@ def main_menu(name, char_class, new_player):
         print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest")
         option = input("Where would you like to go? ").upper()
         if option == "A":
-            notes(new_player)
+            notes(new_player, name, char_class)
         elif option == "B":
             quiz(new_player)
         elif option == "C":
@@ -71,7 +71,7 @@ def main_menu(name, char_class, new_player):
         elif option == "Q":
             quit_program()
 
-def notes(new_player):
+def notes(new_player, name, char_class):
     global courses
     print()
     if new_player:
@@ -85,27 +85,38 @@ def notes(new_player):
         else:
             print("Here are your subjects:")
         for unit in courses:
-            print(f"{unit}")
+            print(f"- {unit}")
         subject = input("What subject would you like to study? Alternatively, you can Edit Courses or Go Back:  ").capitalize()
         if subject in courses:
             note_revision(subject)
         elif subject == "A":
-            course_edit()
+            course_edit(name, char_class)
         elif subject == "B":
             return
 
 def note_revision(subject):
     print()
+    note_dict = dict()
+    filename = subject+".txt"
     print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
-    option = input("What would you like to do?")
+    option = input("What would you like to do? ")
     if option == "A":
-        print("")
+        with open(filename, "r") as file:
+            note_dict = json.load(file)
+        for concept in note_dict:
+            print(f"- {concept}: {note_dict[concept]}")
     elif option == "B":
-        print("")
+        concept = input(f"Key concept for {subject}: ").strip()
+        concept_notes = input("Notes for concept: ").strip()
+        print()
+        note_dict[concept] = concept_notes
+        print(f"{concept} added to your {subject} notes.")
+        with open(filename, 'w') as file:
+            file.write(json.dumps(note_dict))
     elif option == "C":
         return
 
-def course_edit():
+def course_edit(name, char_class):
     print()
     print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back")
     option = input("What would you like to do? ").upper()
@@ -114,17 +125,20 @@ def course_edit():
         if subject in courses:
             print(f"{subject} is already a part of your courses.")
         else:
-            courses.append(subject)
-            print(f"{subject} has been added to your courses.")
             file_name = subject.lower() + ".txt"
-            file_creator(file_name)
+            filepath = filepath_finder(file_name)
+            with open(filepath, "x"):
+                courses.append(subject)
+                print(f"{subject} has been added to your courses.")
     elif option == "B":
         subject = input("What subject would you like to remove? ")
         if subject in courses:
             courses.remove(subject)
             print("The subject has been removed.")
+            os.remove(subject.lower() + ".txt")
         else:
             print("This subject is not a part of your courses.")
+    save_game(name, char_class)
 
 def quiz(new_player):
     print()
@@ -146,7 +160,7 @@ def quit_program():
 
 def save_game(name, char_class):
     file_name = "player_stats.txt"
-    filepath = file_creator(file_name)
+    filepath = filepath_finder(file_name)
     with open(filepath, "w") as file:
         file.write(f"Name: {name}\n")
         file.write(f"Class: {char_class}\n")
