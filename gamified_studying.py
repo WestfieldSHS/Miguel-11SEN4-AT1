@@ -3,21 +3,28 @@ import os
 level = 1
 gold = 0
 courses = ["Maths", "English", "Science"]
+script_dir = os.path.dirname(os.path.abspath(__file__)) #finds the filepath to this python file.
+filepath = os.path.join(script_dir, "player_stats.txt") #uses script_dir to make the files save to same location.
 
 def main():
-    new_player = character_customisation()
-    main_menu(new_player)
+    name, char_class, new_player = character_customisation()
+    main_menu(name, char_class, new_player)
 
 def character_customisation():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    filepath = os.path.join(script_dir, "player_stats.txt")
     try:
         with open(filepath, "x"):
             print("No save file found. Creating one now...")
     except FileExistsError:
         with open(filepath, "r") as file:
+            data = file.readlines()
             print(file.read())
+            name = data[0].split(": ")[1].strip()
+            char_class = data[1].split(": ")[1].strip()
+            level = int(data[2].split(": ")[1].strip())
+            gold = int(data[3].split(": ")[1].strip())
+            courses = eval(data[4].split(": ")[1].strip())
             new_player = False
+            return name, char_class, new_player
     else:
         with open(filepath, "w") as file:
             while True:
@@ -34,11 +41,12 @@ def character_customisation():
                         file.write(f"Gold: {gold}\n")
                         file.write(f"Courses: {courses}")
                         new_player = True
-                        return new_player
+                        return name, char_class, new_player
 
-def main_menu(new_player):
+def main_menu(name, char_class, new_player):
     while True:
         print()
+        save_game(name, char_class)
         print("[1] Training Grounds\n[2] Dungeons\n[3] Marketplace\n[4] Well of Reflection\n[0] Rest")
         option = input("Where would you like to go? ").upper()
         if option == "1":
@@ -57,9 +65,10 @@ def notes(new_player):
     print()
     if new_player:
         print("This is the Training Grounds,\nHere you can make notes on various subjects and recall them.\nTry it.")
-    print("[A] Edit Courses")
-    print("[B] Go Back")
     while True:
+        print()
+        print("[A] Edit Courses")
+        print("[B] Go Back")
         print("Here are your subjects:")
         for unit in courses:
             print(f"{unit}")
@@ -112,5 +121,14 @@ def quit_program():
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper
     if confirmation == "Y":
         quit()
+
+def save_game(name, char_class):
+    global script_dir, filepath
+    with open(filepath, "w") as file:
+        file.write(f"Name: {name}\n")
+        file.write(f"Class: {char_class}\n")
+        file.write(f"Level: {level}\n")
+        file.write(f"Gold: {gold}\n")
+        file.write(f"Courses: {courses}")
 
 main()
