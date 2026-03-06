@@ -2,4 +2,4 @@ Name: Miguel
 Class: Bard
 Level: 1
 Gold: 0
-Courses: ['Maths', 'English', 'Science']
+Courses: ['Maths', 'English', 'Physics']
