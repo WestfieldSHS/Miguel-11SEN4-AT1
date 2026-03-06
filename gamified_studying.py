@@ -1,4 +1,4 @@
-import os, json
+import os, json, sys
 
 level = 1
 gold = 0
@@ -99,7 +99,7 @@ def note_revision(subject):
     note_dict = dict()
     filename = subject+".txt"
     print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
-    option = input("What would you like to do? ")
+    option = input("What would you like to do? ").upper()
     if option == "A":
         with open(filename, "r") as file:
             note_dict = json.load(file)
@@ -156,7 +156,7 @@ def quit_program():
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper
     if confirmation == "Y":
-        quit()
+        sys.exit()
 
 def save_game(name, char_class):
     file_name = "player_stats.txt"
