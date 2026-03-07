@@ -1,5 +1,5 @@
-Name: Angelina
-Class: Artificer
+Name: Miguel
+Class: Bard
 Level: 1
 Gold: 0
-Courses: ['Society & culture']
+Courses: ['English']

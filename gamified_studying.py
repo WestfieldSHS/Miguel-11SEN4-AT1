@@ -98,24 +98,48 @@ def notes(new_player, name, char_class):
 
 def note_revision(subject):
     print()
-    note_dict = dict()
     filename = subject+".txt"
+    filepath = filepath_finder(filename)
+    # loads existing file into the dict, or creates a new one.
+    if os.path.exists(filepath):
+        with open(filepath, "r") as file:
+            try:
+                note_dict = json.load(file)
+            except json.JSONDecodeError:
+                note_dict = dict()
+    else:
+        note_dict = dict()
     print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
     option = input("What would you like to do? ").upper()
     if option == "A":
-            with open(filename, "r") as file:
-                if os.path.getsize(filename) > 0 :
-                    note_dict = json.load(file)
-                    for concept in note_dict:
-                        print(f"- {concept}: {note_dict[concept]}")
+        print(f"Here are your notes for {subject}:")
+        if note_dict:
+            for concept, notes in note_dict.items():
+                print(f"- {concept}: {notes}")
+        else:
+            print("No notes yet.")
     elif option == "B":
-        concept = input(f"Key concept for {subject}: ").strip()
-        concept_notes = input("Notes for concept: ").strip()
-        print()
-        note_dict[concept] = concept_notes
-        print(f"{concept} added to your {subject} notes.")
-        with open(filename, 'w') as file:
-            file.write(json.dumps(note_dict))
+        print("CTRL+Z to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
+        while True:
+            try:
+                concept = input(f"Key concept for {subject}: ").strip().capitalize()
+            except EOFError:
+                break
+            else:
+                if "Remove " in concept:
+                    concept = concept.replace("Remove ", "").capitalize()
+                    if concept in note_dict:
+                        del note_dict[concept]
+                        print(f"{concept} removed from notes.")
+                    else:
+                        print("This concept is not in your notes.")
+                else:
+                    concept_notes = input("Notes for concept: ").strip()
+                    note_dict[concept] = concept_notes
+                    print(f"{concept} added to your {subject} notes.")
+                with open(filepath, "w") as file:
+                    json.dump(note_dict, file, indent=4) # converts the note_dict object in the location of file, with 4 indents per line
+                print()
     elif option == "C":
         return
 
@@ -134,7 +158,7 @@ def course_edit(name, char_class):
                 courses.append(subject)
                 print(f"{subject} has been added to your courses.")
     elif option == "B":
-        subject = input("What subject would you like to remove? ")
+        subject = input("What subject would you like to remove? ").capitalize().strip()
         if subject in courses:
             courses.remove(subject)
             print("The subject has been removed.")
@@ -156,7 +180,7 @@ def shop(new_player):
     if new_player:
         print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.\nTry it.")
     print("blah")
-    
+
 def quit_program():
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper()
