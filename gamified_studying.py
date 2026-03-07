@@ -192,32 +192,50 @@ def quiz_main(subject):
         return
     print()
     print("Quiz begin")
-    filename = subject+"_questions.txt"
-    questions, question, options, answer_index = load_questions(filename)
-    ask_question(questions, question, options, answer_index)
+    ask_question(subject)
     
 def load_questions(filename):
-    questions = list()
     with open(filename, "r") as file:
-        for line in file:
-            if ":" not in line:
-                continue
-            # splits each line into 3 parts: question, options, answer
-            question, rest = line.split(":", 1)
-            options, answer = rest.split("|")
-            question = question.strip()
-            options = options.strip()
-            answer_index = int(answer.strip())
+        lines = file.read().splitlines()
+        random_line = random.choice(lines)
+        print(random_line)
+        question, rest = random_line.split(":", 1)
+        choices, correct_answer = rest.split("|")
+        question = question.strip()
+        choices = choices.strip()
+        correct_answer = int(correct_answer.strip())
+    return question, choices, correct_answer
 
-            questions.append({
-                "question": question,
-                "options": options,
-                "correct": answer_index
-            })
-    return questions
-
-def ask_question(questions):
-    pass
+def ask_question(subject):
+    n = 1
+    filename = subject+"_questions.txt"
+    while True:
+        question, choices, correct_answer = load_questions(filename)
+        print()
+        choices = choices.replace('"', "").replace("[", "").replace("]", "")
+        multiple_choice = choices.split(",")
+        shuffled_multiple_choice = multiple_choice[:] # creates a duplicate of the list
+        random.shuffle(shuffled_multiple_choice)
+        print(f"{n}.{question}")
+        print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
+        try:
+            answer = input("Answer: ").upper()
+        except EOFError:
+            break
+        else:
+            if answer == "A":
+                answer = shuffled_multiple_choice[0]
+            elif answer == "B":
+                answer = shuffled_multiple_choice[1]
+            elif answer == "C":
+                answer = shuffled_multiple_choice[2]
+            elif answer == "D":
+                answer = shuffled_multiple_choice[3]
+            if answer == multiple_choice[correct_answer]:
+                print("CORRECT")
+            else:
+                print("wrong.")
+            n += 1
 
 def shop(new_player):
     print()
