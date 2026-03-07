@@ -1,4 +1,4 @@
-import os, json, sys
+import os, json, sys, random
 
 level = 1
 health = 5
@@ -171,9 +171,53 @@ def quiz(new_player):
     print()
     if new_player:
         print("This is the Dungeons.\n Here you can take quizzes on certain subjects and level up.\nTry it.")
-    # malevolent mines of mathematics - chand devil, prasmadeus, nguimp, tran, yakob, gilled devil, kumar, jenkins
-    # english - deligorgon, demogounder, usel, alexakis, lambkin,
-    print("[A] Descend into the Malevolent Mines of Mathematics\n[B] x x of English\n[C] Fantastical Forest of Physics\n[D] x x of Legal")
+    print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades, [E] Go Back")
+    option = input("What dungeon would you like to explore? ").upper().strip()
+    if option == "A":
+        subject = "maths"
+    elif option == "B":
+        subject = "legal_studies"
+    elif option == "C":
+        subject = "physics"
+    elif option == "D":
+        subject = "english"
+    elif option == "E":
+        return
+    else:
+        subject = ""
+    quiz_main(subject)
+
+def quiz_main(subject):
+    if not subject:
+        return
+    print()
+    print("Quiz begin")
+    filename = subject+"_questions.txt"
+    questions, question, options, answer_index = load_questions(filename)
+    ask_question(questions, question, options, answer_index)
+    
+def load_questions(filename):
+    questions = list()
+    with open(filename, "r") as file:
+        for line in file:
+            if ":" not in line:
+                continue
+            # splits each line into 3 parts: question, options, answer
+            question, rest = line.split(":", 1)
+            options, answer = rest.split("|")
+            question = question.strip()
+            options = options.strip()
+            answer_index = int(answer.strip())
+
+            questions.append({
+                "question": question,
+                "options": options,
+                "correct": answer_index
+            })
+    return questions
+
+def ask_question(questions):
+    pass
 
 def shop(new_player):
     print()
@@ -183,7 +227,7 @@ def shop(new_player):
 
 def quit_program():
     print()
-    confirmation = input("[Y/N] Are you sure you want to quit? ").upper()
+    confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
     if confirmation == "Y":
         sys.exit()
 
