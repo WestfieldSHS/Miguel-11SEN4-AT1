@@ -1,5 +1,5 @@
 Name: Miguel
-Class: Bard
+Class: Artificer
 Level: 1
 Gold: 0
-Courses: ['English']
+Courses: []
