@@ -1,4 +1,4 @@
-import os, json, sys, random
+import os, json, sys, random, time
 
 level = 1
 health = 5
@@ -61,7 +61,6 @@ def filepath_finder(file_name):
 
 def main_menu(name, char_class, new_player):
     while True:
-        print()
         save_game(name, char_class)
         print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest")
         option = input("Where would you like to go? ").upper().strip()
