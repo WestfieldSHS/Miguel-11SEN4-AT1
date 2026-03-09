@@ -5,6 +5,9 @@ health = 5
 gold = 0
 courses = []
 
+def clear():
+    os.system("cls")
+
 def main():
     name, char_class, new_player = character_customisation()
     main_menu(name, char_class, new_player)
@@ -63,17 +66,18 @@ def main_menu(name, char_class, new_player):
         print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest")
         option = input("Where would you like to go? ").upper().strip()
         # standard method of choosing options across my program
-        if option == "A":
-            notes(new_player, name, char_class)
-        elif option == "B":
-            quiz(new_player)
-        elif option == "C":
-            shop(new_player)
-        elif option == "D":
-            print()
-            character_customisation()
-        elif option == "Q":
-            quit_program()
+        match option:
+            case "A":
+                notes(new_player, name, char_class)
+            case "B":
+                quiz(new_player)
+            case "C":
+                shop(new_player)
+            case "D":
+                print()
+                character_customisation()
+            case "Q":
+                quit_program()
 
 def notes(new_player, name, char_class):
     global courses
@@ -92,10 +96,11 @@ def notes(new_player, name, char_class):
         subject = input("What subject would you like to study? Alternatively, you can Edit Courses or Go Back: ").capitalize().strip()
         if subject in courses:
             note_revision(subject)
-        elif subject == "A":
-            course_edit(name, char_class)
-        elif subject == "B":
-            return
+        match subject:
+            case "A":
+                course_edit(name, char_class)
+            case "B":
+                return
 
 def note_revision(subject):
     print()
@@ -112,60 +117,62 @@ def note_revision(subject):
         note_dict = dict() # converts the json file into a dict
     print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
     option = input("What would you like to do? ").upper().strip()
-    if option == "A":
-        print(f"Here are your notes for {subject}:")
-        if note_dict:
-            for concept, notes in note_dict.items():
-                print(f"- {concept}: {notes}")
-        else:
-            print("No notes yet.")
-    elif option == "B":
-        print("CTRL+Z to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
-        while True:
-            try:
-                concept = input(f"Key concept for {subject}: ").strip().capitalize()
-            except EOFError: # raised when ctrl+z (windows) or ctrl+d (mac) is inputted
-                break
+    match option:
+        case "A":
+            print(f"Here are your notes for {subject}:")
+            if note_dict:
+                for concept, notes in note_dict.items():
+                    print(f"- {concept}: {notes}")
             else:
-                if "Remove " in concept:
-                    concept = concept.replace("Remove ", "").capitalize() # deletes the remove keyword
-                    if concept in note_dict:
-                        del note_dict[concept] # deletes it from the dictionary
-                        print(f"{concept} removed from notes.")
-                    else:
-                        print("This concept is not in your notes.")
+                print("No notes yet.")
+        case "B":
+            print("CTRL+Z to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
+            while True:
+                try:
+                    concept = input(f"Key concept for {subject}: ").strip().capitalize()
+                except EOFError: # raised when ctrl+z (windows) or ctrl+d (mac) is inputted
+                    break
                 else:
-                    concept_notes = input("Notes for concept: ").strip()
-                    note_dict[concept] = concept_notes
-                    print(f"{concept} added to your {subject} notes.")
-                with open(filepath, "w") as file: # rewrites the entire file to update
-                    json.dump(note_dict, file, indent=4) # converts the note_dict object in the location of file, with 4 indents per line
-                print()
-    elif option == "C":
-        return
+                    if "Remove " in concept:
+                        concept = concept.replace("Remove ", "").capitalize() # deletes the remove keyword
+                        if concept in note_dict:
+                            del note_dict[concept] # deletes it from the dictionary
+                            print(f"{concept} removed from notes.")
+                        else:
+                            print("This concept is not in your notes.")
+                    else:
+                        concept_notes = input("Notes for concept: ").strip()
+                        note_dict[concept] = concept_notes
+                        print(f"{concept} added to your {subject} notes.")
+                    with open(filepath, "w") as file: # rewrites the entire file to update
+                        json.dump(note_dict, file, indent=4) # converts the note_dict object in the location of file, with 4 indents per line
+                    print()
+        case "C":
+            return
 
 def course_edit(name, char_class):
     print()
     print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back")
     option = input("What would you like to do? ").upper().strip()
-    if option == "A":
-        subject = input("What subject would you like to add to your courses? ").capitalize().strip()
-        if subject in courses:
-            print(f"{subject} is already a part of your courses.")
-        else:
-            file_name = subject.lower() + ".txt"
-            filepath = filepath_finder(file_name)
-            with open(filepath, "x"):
-                courses.append(subject) # appends the subject to the user's course list
-                print(f"{subject} has been added to your courses.")
-    elif option == "B":
-        subject = input("What subject would you like to remove? ").capitalize().strip()
-        if subject in courses:
-            courses.remove(subject)
-            print("The subject has been removed.")
-            os.remove(subject.lower() + ".txt") # removes the text file
-        else:
-            print("This subject is not a part of your courses.")
+    match option:
+        case "A":
+            subject = input("What subject would you like to add to your courses? ").capitalize().strip()
+            if subject in courses:
+                print(f"{subject} is already a part of your courses.")
+            else:
+                file_name = subject.lower() + ".txt"
+                filepath = filepath_finder(file_name)
+                with open(filepath, "x"):
+                    courses.append(subject) # appends the subject to the user's course list
+                    print(f"{subject} has been added to your courses.")
+        case "B":
+            subject = input("What subject would you like to remove? ").capitalize().strip()
+            if subject in courses:
+                courses.remove(subject)
+                print("The subject has been removed.")
+                os.remove(subject.lower() + ".txt") # removes the text file
+            else:
+                print("This subject is not a part of your courses.")
     save_game(name, char_class)
 
 def quiz(new_player):
@@ -174,18 +181,19 @@ def quiz(new_player):
         print("This is the Dungeons.\nHere you can take quizzes on certain subjects and level up.\nTry it.")
     print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Go Back")
     option = input("What dungeon would you like to explore? ").upper().strip()
-    if option == "A":
-        subject = "maths"
-    elif option == "B":
-        subject = "legal_studies"
-    elif option == "C":
-        subject = "physics"
-    elif option == "D":
-        subject = "english"
-    elif option == "E":
-        return
-    else:
-        subject = ""
+    match option:
+        case "A":
+            subject = "maths"
+        case  "B":
+            subject = "legal_studies"
+        case "C":
+            subject = "physics"
+        case "D":
+            subject = "english"
+        case "E":
+            return
+        case _:
+            subject = ""
     quiz_main(subject)
 
 def quiz_main(subject):

@@ -2,4 +2,4 @@ Name: Miguel
 Class: Artificer
 Level: 1
 Gold: 0
-Courses: []
+Courses: ['Software engineering', 'Maths']
