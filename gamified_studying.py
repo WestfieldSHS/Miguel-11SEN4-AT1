@@ -1,4 +1,4 @@
-import os, json, sys, random, time
+import os, json, sys, random
 
 level = 1
 health = 5
@@ -221,14 +221,15 @@ def ask_question(subject):
         except EOFError:
             break
         else:
-            if answer == "A":
-                answer = shuffled_multiple_choice[0]
-            elif answer == "B":
-                answer = shuffled_multiple_choice[1]
-            elif answer == "C":
-                answer = shuffled_multiple_choice[2]
-            elif answer == "D":
-                answer = shuffled_multiple_choice[3]
+            match answer:
+                case "A":
+                    answer = shuffled_multiple_choice[0]
+                case "B":
+                    answer = shuffled_multiple_choice[1]
+                case "C":
+                    answer = shuffled_multiple_choice[2]
+                case "D":
+                    answer = shuffled_multiple_choice[3]
             # temp
             if answer == multiple_choice[correct_answer]:
                 print("CORRECT")
