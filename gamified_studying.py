@@ -1,6 +1,7 @@
 import os, json, sys, random
 
 level = 1
+exp = 0
 health = 5
 gold = 0
 courses = []
@@ -13,7 +14,7 @@ def main():
     main_menu(name, char_class, new_player)
 
 def character_customisation():
-    global level, gold, courses
+    global level, exp, gold, courses
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
     try:
@@ -30,8 +31,9 @@ def character_customisation():
         name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of a list, seperated by the colon. saves the second part to the variable
         char_class = data[1].split(": ")[1].strip() # same thing but with the second line
         level = int(data[2].split(": ")[1].strip())
-        gold = int(data[3].split(": ")[1].strip())
-        courses = eval(data[4].split(": ")[1].strip()) # deals with the global courses variable
+        exp = int(data[3].split(": ")[1].strip())
+        gold = int(data[4].split(": ")[1].strip())
+        courses = eval(data[5].split(": ")[1].strip()) # deals with the global courses variable
         new_player = False
     else:
         with open(filepath, "w") as file: # creates a file and writes in it
@@ -46,6 +48,7 @@ def character_customisation():
                         file.write(f"Name: {name}\n")
                         file.write(f"Class: {char_class}\n")
                         file.write(f"Level: {level}\n")
+                        file.write(f"Experience: {exp}\n")
                         file.write(f"Health: {health}\n")
                         file.write(f"Gold: {gold}\n")
                         file.write(f"Courses: {courses}")
@@ -61,6 +64,7 @@ def filepath_finder(file_name):
 
 def main_menu(name, char_class, new_player):
     while True:
+        print()
         save_game(name, char_class)
         print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest")
         option = input("Where would you like to go? ").upper().strip()
@@ -102,6 +106,7 @@ def notes(new_player, name, char_class):
                 return
 
 def note_revision(subject):
+    global exp
     print()
     filename = subject.lower() + ".txt"
     filepath = filepath_finder(filename)
@@ -143,6 +148,7 @@ def note_revision(subject):
                         concept_notes = input("Notes for concept: ").strip()
                         note_dict[concept] = concept_notes
                         print(f"{concept} added to your {subject} notes.")
+                        exp += 1
                     with open(filepath, "w") as file: # rewrites the entire file to update
                         json.dump(note_dict, file, indent=4) # converts the note_dict object in the location of file, with 4 indents per line
                     print()
@@ -204,6 +210,7 @@ def quiz_main(subject):
 
 # the following 2 functions are the foundations. how they will be used will change however.
 def ask_question(subject):
+    global exp
     n = 1
     filename = subject+"_questions.txt"
     print("CTRL+Z to stop the quiz.")
@@ -233,6 +240,7 @@ def ask_question(subject):
             # temp
             if answer == multiple_choice[correct_answer]:
                 print("CORRECT")
+                exp += 10
             else:
                 print("wrong.")
             n += 1
@@ -264,12 +272,17 @@ def quit_program():
 
 # saves the player's stats every time the main menu is accessed
 def save_game(name, char_class):
+    global exp, level
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
+    if exp >= 100:
+        exp -= 100
+        level += 1
     with open(filepath, "w") as file:
         file.write(f"Name: {name}\n")
         file.write(f"Class: {char_class}\n")
         file.write(f"Level: {level}\n")
+        file.write(f"Experience: {exp}\n")
         file.write(f"Gold: {gold}\n")
         file.write(f"Courses: {courses}")
 

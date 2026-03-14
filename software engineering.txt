@@ -1,4 +1,0 @@
-{
-    "Integers": "A whole number",
-    "Characters": "Qualtitative data"
-}

@@ -1,1 +1,5 @@
-{}
+{
+    "I": "Me",
+    "Hate": "Disdain",
+    "Maths": "Mathematics"
+}

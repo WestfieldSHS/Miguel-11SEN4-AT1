@@ -1,5 +1,6 @@
-Name: Miguel
-Class: Artificer
-Level: 1
+Name: mig
+Class: Bard
+Level: 2
+Experience: 43
 Gold: 0
-Courses: ['Software engineering', 'Maths']
+Courses: ['Maths']
