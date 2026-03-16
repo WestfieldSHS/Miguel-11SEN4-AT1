@@ -1,3 +1,6 @@
+# use debugging tools
+# record all errors
+
 import os, json, sys, random
 
 level = 1
@@ -205,11 +208,24 @@ def quiz_main(subject):
     if not subject: # blank variable is False
         return
     print()
-    print("Quiz begin") # placeholder
-    ask_question(subject)
+    dungeon_lvl = 1
+    monster = difficulty(dungeon_lvl)
+    ask_question(subject, monster)
+
+def difficulty(dungeon_lvl):
+    match dungeon_lvl:
+        case 1:
+            monster_list = ["Slime", "Zombie", "Skeleton"]
+        case 2:
+            monster_list = ["Big Slime", "Big Zombie", "Big Skeleton"]
+        case 3:
+            monster_list = ["Biggest Slime", "Biggest Zombie", "Biggest Skeleton"]
+    monster = random.choice(monster_list)
+    print(f"A {monster} appears before you")
+    return monster
 
 # the following 2 functions are the foundations. how they will be used will change however.
-def ask_question(subject):
+def ask_question(subject, monster):
     global exp
     n = 1
     filename = subject+"_questions.txt"
@@ -221,6 +237,7 @@ def ask_question(subject):
         multiple_choice = choices.split(",") # due to commas being, you know, apart of grammar, this raises a bunch of errors if a comma is present IN the option itself
         shuffled_multiple_choice = multiple_choice[:] # creates a duplicate of the list
         random.shuffle(shuffled_multiple_choice)
+        print(f"The {monster} readies to attack.")
         print(f"{n}.{question}")
         print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
         try:
@@ -249,7 +266,6 @@ def load_questions(filename):
     with open(filename, "r") as file:
         lines = file.read().splitlines() # returns a list of the loaded file's lines
         random_line = random.choice(lines)
-        print(random_line) # debug tool to see what questions raise errors
         question, rest = random_line.split(":", 1) # splits at the colon, max 1 time, creating 2 items
         choices, correct_answer = rest.split("|") # further splits, creating 3 items in total
         question = question.strip()
