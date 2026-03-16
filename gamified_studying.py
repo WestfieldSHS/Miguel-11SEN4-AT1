@@ -196,6 +196,7 @@ def course_edit(name, char_class):
                 print("This subject is not a part of your courses.")
     save_game(name, char_class)
 
+# start of quiz functions
 def quiz(new_player):
     global quiz_over
     print()
@@ -258,7 +259,6 @@ def difficulty(dungeon_lvl):
     print(f"A {monster_name} appears before you")
     return monster_name, monster_hp
 
-# the following 2 functions are the foundations. how they will be used will change however.
 def ask_question(subject, q_num):
     global exp
     filename = subject+"_questions.txt"
@@ -327,9 +327,12 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject):
 def dungeon_over(dungeon_lvl, quiz_over):
     if dungeon_lvl == 4:
         print("You cleared the dungeon.")
+        print("Rewards...")
     else:
         print("The dungeon cleared you...")
+        print("Rewards...")
     quiz_over = False
+# end of quiz functions
 
 # uncompleted
 def shop(new_player):
@@ -364,3 +367,11 @@ def save_game(name, char_class):
         file.write(f"Courses: {courses}") # 8
 
 main()
+
+# reward system
+# ensure the hp doesnt change globally
+# give exp
+# shop
+# modify stats
+# rename things
+# complete
