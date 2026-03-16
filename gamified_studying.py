@@ -8,6 +8,9 @@ exp = 0
 health = 5
 gold = 0
 courses = []
+humanity_dmg_mod = 0
+stem_dmg_mod = 0
+quiz_over = False
 
 def clear():
     os.system("cls")
@@ -17,7 +20,7 @@ def main():
     main_menu(name, char_class, new_player)
 
 def character_customisation():
-    global level, exp, gold, courses
+    global level, exp, gold, courses, health, humanity_dmg_mod, stem_dmg_mod
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
     try:
@@ -31,30 +34,39 @@ def character_customisation():
             print("========================")
         with open(filepath, "r") as file:
             data = file.readlines()
-        name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of a list, seperated by the colon. saves the second part to the variable
-        char_class = data[1].split(": ")[1].strip() # same thing but with the second line
-        level = int(data[2].split(": ")[1].strip())
-        exp = int(data[3].split(": ")[1].strip())
-        gold = int(data[4].split(": ")[1].strip())
-        courses = eval(data[5].split(": ")[1].strip()) # deals with the global courses variable
-        new_player = False
+            name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of a list, seperated by the colon. saves the second part to the variable
+            char_class = data[1].split(": ")[1].strip() # same thing but with the second line
+            level = int(data[2].split(": ")[1].strip())
+            exp = int(data[3].split(": ")[1].strip())
+            health = int(data[4].split(": ")[1].strip())
+            gold = int(data[5].split(": ")[1].strip())
+            humanity_dmg_mod = int(data[6].split(": ")[1].strip())
+            stem_dmg_mod = int(data[7].split(": ")[1].strip())
+            courses = eval(data[8].split(": ")[1].strip()) # deals with the global courses variable
+            new_player = False
     else:
         with open(filepath, "w") as file: # creates a file and writes in it
             while True:
                 name = input("Please input your name. It must be between 2 and 16 characters: ").strip()
                 if 2 <= len(name) <= 16: # arbitrary name length
-                    print("Artificer: Better at STEM.")
                     print("Bard: Better at the Humanities")
+                    print("Artificer: Better at STEM.")
                     class_list = ["Artificer", "Bard"]
                     char_class = input("What type of student are you? ").capitalize().strip()
                     if char_class in class_list:
-                        file.write(f"Name: {name}\n")
-                        file.write(f"Class: {char_class}\n")
-                        file.write(f"Level: {level}\n")
-                        file.write(f"Experience: {exp}\n")
-                        file.write(f"Health: {health}\n")
-                        file.write(f"Gold: {gold}\n")
-                        file.write(f"Courses: {courses}")
+                        if char_class == "Bard":
+                            humanity_dmg_mod = 1
+                        else:
+                            stem_dmg_mod = 1
+                        file.write(f"Name: {name}\n") # 0
+                        file.write(f"Class: {char_class}\n") # 1
+                        file.write(f"Level: {level}\n") # 2
+                        file.write(f"Experience: {exp}\n") # 3
+                        file.write(f"Health: {health}\n") # 4
+                        file.write(f"Gold: {gold}\n") # 5
+                        file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
+                        file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
+                        file.write(f"Courses: {courses}") # 8
                         new_player = True
                         break
     return name, char_class, new_player
@@ -205,41 +217,49 @@ def quiz(new_player):
     quiz_main(subject)
 
 def quiz_main(subject):
+    global quiz_over
     if not subject: # blank variable is False
         return
     print()
     dungeon_lvl = 1
-    monster = difficulty(dungeon_lvl)
-    ask_question(subject, monster)
+    while quiz_over == False:
+        monster_name, monster_hp = difficulty(dungeon_lvl)
+        correct = ask_question(subject, monster_name)
+        quiz_over = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject)
 
 def difficulty(dungeon_lvl):
     match dungeon_lvl:
         case 1:
             monster_list = ["Slime", "Zombie", "Skeleton"]
+            monster_hp = 3
         case 2:
             monster_list = ["Big Slime", "Big Zombie", "Big Skeleton"]
+            monster_hp = 5
         case 3:
             monster_list = ["Biggest Slime", "Biggest Zombie", "Biggest Skeleton"]
-    monster = random.choice(monster_list)
-    print(f"A {monster} appears before you")
-    return monster
+            monster_hp = 10
+        case 4:
+            print("You cleared the Dungeon!")
+    monster_name = random.choice(monster_list)
+    print(f"A {monster_name} appears before you")
+    return monster_name, monster_hp
 
 # the following 2 functions are the foundations. how they will be used will change however.
-def ask_question(subject, monster):
+def ask_question(subject, monster_name):
     global exp
     n = 1
     filename = subject+"_questions.txt"
     print("CTRL+Z to stop the quiz.")
-    while True: # temporary loop to just show that the questions work
-        question, choices, correct_answer = load_questions(filename)
-        print()
-        choices = choices.replace('"', "").replace("[", "").replace("]", "") # removes the old formatting.
-        multiple_choice = choices.split(",") # due to commas being, you know, apart of grammar, this raises a bunch of errors if a comma is present IN the option itself
-        shuffled_multiple_choice = multiple_choice[:] # creates a duplicate of the list
-        random.shuffle(shuffled_multiple_choice)
-        print(f"The {monster} readies to attack.")
-        print(f"{n}.{question}")
-        print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
+    question, choices, correct_answer = load_questions(filename)
+    print()
+    choices = choices.replace('"', "").replace("[", "").replace("]", "") # removes the old formatting.
+    multiple_choice = choices.split(",") # due to commas being, you know, apart of grammar, this raises a bunch of errors if a comma is present IN the option itself
+    shuffled_multiple_choice = multiple_choice[:] # creates a duplicate of the list
+    random.shuffle(shuffled_multiple_choice)
+    print(f"The {monster_name} readies to attack.")
+    print(f"{n}.{question}")
+    print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
+    while True:
         try:
             answer = input("Answer: ").upper().strip()
         except EOFError:
@@ -254,13 +274,12 @@ def ask_question(subject, monster):
                     answer = shuffled_multiple_choice[2]
                 case "D":
                     answer = shuffled_multiple_choice[3]
-            # temp
             if answer == multiple_choice[correct_answer]:
-                print("CORRECT")
-                exp += 10
+                correct = True
             else:
-                print("wrong.")
+                correct = False
             n += 1
+            return correct
 
 def load_questions(filename):
     with open(filename, "r") as file:
@@ -272,6 +291,27 @@ def load_questions(filename):
         choices = choices.strip()
         correct_answer = int(correct_answer.strip())
     return question, choices, correct_answer
+
+def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject):
+    global humanity_dmg_mod, stem_dmg_mod, health, quiz_over
+    if correct:
+        if subject == "legal_studies" or "english":
+            dmg = 1 + humanity_dmg_mod
+        else:
+            dmg = 1 + stem_dmg_mod
+        print(f"You damaged {monster_name} by {dmg} points.")
+        monster_hp -= dmg
+        if monster_hp <= 0:
+            dungeon_lvl += 1
+            if dungeon_lvl == 4:
+                quiz_over = True
+    else:
+        dmg = dungeon_lvl
+        health -= dmg
+        if health <= 0:
+            print(f"You were defeated by the {monster_name}")
+            quiz_over = True
+    return quiz_over
 
 # uncompleted
 def shop(new_player):
@@ -295,11 +335,14 @@ def save_game(name, char_class):
         exp -= 100
         level += 1
     with open(filepath, "w") as file:
-        file.write(f"Name: {name}\n")
-        file.write(f"Class: {char_class}\n")
-        file.write(f"Level: {level}\n")
-        file.write(f"Experience: {exp}\n")
-        file.write(f"Gold: {gold}\n")
-        file.write(f"Courses: {courses}")
+        file.write(f"Name: {name}\n") # 0
+        file.write(f"Class: {char_class}\n") # 1
+        file.write(f"Level: {level}\n") # 2
+        file.write(f"Experience: {exp}\n") # 3
+        file.write(f"Health: {health}\n") # 4
+        file.write(f"Gold: {gold}\n") # 5
+        file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
+        file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
+        file.write(f"Courses: {courses}") # 8
 
 main()

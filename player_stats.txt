@@ -1,6 +1,9 @@
-Name: mig
+Name: Miguel
 Class: Bard
-Level: 2
-Experience: 43
+Level: 1
+Experience: 0
+Health: 5
 Gold: 0
-Courses: ['Maths']
+Humanitarian Expertise: 1
+STEM Expertise: 0
+Courses: []
