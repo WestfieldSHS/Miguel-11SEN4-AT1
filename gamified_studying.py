@@ -3,6 +3,7 @@
 
 import os, json, sys, random
 
+# global variables
 level = 1
 exp = 0
 health = 5
@@ -10,6 +11,7 @@ gold = 0
 courses = []
 humanity_dmg_mod = 0
 stem_dmg_mod = 0
+monster_slain = True
 quiz_over = False
 
 def clear():
@@ -62,7 +64,7 @@ def character_customisation():
                         file.write(f"Class: {char_class}\n") # 1
                         file.write(f"Level: {level}\n") # 2
                         file.write(f"Experience: {exp}\n") # 3
-                        file.write(f"Health: {health}\n") # 4
+                        file.write(f"Max HP: {health}\n") # 4
                         file.write(f"Gold: {gold}\n") # 5
                         file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
                         file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
@@ -103,7 +105,6 @@ def notes(new_player, name, char_class):
     if new_player: # only prints this tutorial message if the player is on their first playthrough
         print("This is the Training Grounds,\nHere you can make notes on various subjects and recall them.\nTry it.")
     while True:
-        print()
         print("[A] Edit Courses\n[B] Go Back")
         if len(courses) == 0:
             print("You have no subjects. Add some!")
@@ -196,6 +197,7 @@ def course_edit(name, char_class):
     save_game(name, char_class)
 
 def quiz(new_player):
+    global quiz_over
     print()
     if new_player:
         print("This is the Dungeons.\nHere you can take quizzes on certain subjects and level up.\nTry it.")
@@ -217,26 +219,38 @@ def quiz(new_player):
     quiz_main(subject)
 
 def quiz_main(subject):
-    global quiz_over
+    global monster_slain, health, quiz_over
     if not subject: # blank variable is False
         return
     print()
     dungeon_lvl = 1
+    q_num = 1
     while quiz_over == False:
-        monster_name, monster_hp = difficulty(dungeon_lvl)
-        correct = ask_question(subject, monster_name)
-        quiz_over = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject)
+        if monster_slain == True:
+            monster_name, monster_hp = difficulty(dungeon_lvl)
+        if dungeon_lvl == 3:
+            print(f"The {monster_name} looks at you.")
+        else:
+            print(f"The {monster_name} readies to attack.")
+        correct, q_num = ask_question(subject, q_num)
+        quiz_over, monster_hp, monster_slain, dungeon_lvl = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject)
+        print(f"HP: {health}")
+    dungeon_over(dungeon_lvl)
 
 def difficulty(dungeon_lvl):
+    print()
     match dungeon_lvl:
         case 1:
-            monster_list = ["Slime", "Zombie", "Skeleton"]
+            print("You enter the dungeon.")
+            monster_list = ["Slime 🧪 ", "Zombie 🧟 ", "Skeleton 🩻 "]
             monster_hp = 3
         case 2:
-            monster_list = ["Big Slime", "Big Zombie", "Big Skeleton"]
+            print("You delve deeper into the dungeon.")
+            monster_list = ["Big Slime 🧪 ", "Big Zombie 🧟 ", "Big Skeleton 🩻 "]
             monster_hp = 5
         case 3:
-            monster_list = ["Biggest Slime", "Biggest Zombie", "Biggest Skeleton"]
+            print("You open the doors to the final chamber.")
+            monster_list = ["Biggest Slime 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
             monster_hp = 10
         case 4:
             print("You cleared the Dungeon!")
@@ -245,41 +259,34 @@ def difficulty(dungeon_lvl):
     return monster_name, monster_hp
 
 # the following 2 functions are the foundations. how they will be used will change however.
-def ask_question(subject, monster_name):
+def ask_question(subject, q_num):
     global exp
-    n = 1
     filename = subject+"_questions.txt"
-    print("CTRL+Z to stop the quiz.")
     question, choices, correct_answer = load_questions(filename)
     print()
     choices = choices.replace('"', "").replace("[", "").replace("]", "") # removes the old formatting.
     multiple_choice = choices.split(",") # due to commas being, you know, apart of grammar, this raises a bunch of errors if a comma is present IN the option itself
     shuffled_multiple_choice = multiple_choice[:] # creates a duplicate of the list
     random.shuffle(shuffled_multiple_choice)
-    print(f"The {monster_name} readies to attack.")
-    print(f"{n}.{question}")
+    print(f"{q_num}. {question}")
     print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
     while True:
-        try:
-            answer = input("Answer: ").upper().strip()
-        except EOFError:
-            break
+        answer = input("Answer: ").upper().strip()
+        match answer:
+            case "A":
+                answer = shuffled_multiple_choice[0]
+            case "B":
+                answer = shuffled_multiple_choice[1]
+            case "C":
+                answer = shuffled_multiple_choice[2]
+            case "D":
+                answer = shuffled_multiple_choice[3]
+        if answer == multiple_choice[correct_answer]:
+            correct = True
         else:
-            match answer:
-                case "A":
-                    answer = shuffled_multiple_choice[0]
-                case "B":
-                    answer = shuffled_multiple_choice[1]
-                case "C":
-                    answer = shuffled_multiple_choice[2]
-                case "D":
-                    answer = shuffled_multiple_choice[3]
-            if answer == multiple_choice[correct_answer]:
-                correct = True
-            else:
-                correct = False
-            n += 1
-            return correct
+            correct = False
+        q_num += 1
+        return correct, q_num
 
 def load_questions(filename):
     with open(filename, "r") as file:
@@ -293,25 +300,36 @@ def load_questions(filename):
     return question, choices, correct_answer
 
 def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject):
-    global humanity_dmg_mod, stem_dmg_mod, health, quiz_over
+    global humanity_dmg_mod, stem_dmg_mod, health
     if correct:
         if subject == "legal_studies" or "english":
             dmg = 1 + humanity_dmg_mod
         else:
             dmg = 1 + stem_dmg_mod
         print(f"You damaged {monster_name} by {dmg} points.")
-        monster_hp -= dmg
+        monster_hp = monster_hp - dmg
+        monster_slain = False
         if monster_hp <= 0:
             dungeon_lvl += 1
+            monster_slain = True
             if dungeon_lvl == 4:
                 quiz_over = True
     else:
         dmg = dungeon_lvl
         health -= dmg
+        print(f"The {monster_name} damaged you by {dmg} points.")
+        monster_slain = False
         if health <= 0:
             print(f"You were defeated by the {monster_name}")
             quiz_over = True
-    return quiz_over
+    return quiz_over, monster_hp, monster_slain, dungeon_lvl
+
+def dungeon_over(dungeon_lvl, quiz_over):
+    if dungeon_lvl == 4:
+        print("You cleared the dungeon.")
+    else:
+        print("The dungeon cleared you...")
+    quiz_over = False
 
 # uncompleted
 def shop(new_player):
@@ -339,7 +357,7 @@ def save_game(name, char_class):
         file.write(f"Class: {char_class}\n") # 1
         file.write(f"Level: {level}\n") # 2
         file.write(f"Experience: {exp}\n") # 3
-        file.write(f"Health: {health}\n") # 4
+        file.write(f"Max HP: {health}\n") # 4
         file.write(f"Gold: {gold}\n") # 5
         file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
         file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
