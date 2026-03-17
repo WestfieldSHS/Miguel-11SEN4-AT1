@@ -6,7 +6,7 @@ import os, json, sys, random
 # global variables
 level = 1
 exp = 0
-health = 5
+max_health = 5
 gold = 0
 courses = []
 humanity_dmg_mod = 0
@@ -22,7 +22,7 @@ def main():
     main_menu(name, char_class, new_player)
 
 def character_customisation():
-    global level, exp, gold, courses, health, humanity_dmg_mod, stem_dmg_mod
+    global level, exp, gold, courses, max_health, humanity_dmg_mod, stem_dmg_mod
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
     try:
@@ -40,7 +40,7 @@ def character_customisation():
             char_class = data[1].split(": ")[1].strip() # same thing but with the second line
             level = int(data[2].split(": ")[1].strip())
             exp = int(data[3].split(": ")[1].strip())
-            health = int(data[4].split(": ")[1].strip())
+            max_health = int(data[4].split(": ")[1].strip())
             gold = int(data[5].split(": ")[1].strip())
             humanity_dmg_mod = int(data[6].split(": ")[1].strip())
             stem_dmg_mod = int(data[7].split(": ")[1].strip())
@@ -64,7 +64,7 @@ def character_customisation():
                         file.write(f"Class: {char_class}\n") # 1
                         file.write(f"Level: {level}\n") # 2
                         file.write(f"Experience: {exp}\n") # 3
-                        file.write(f"Max HP: {health}\n") # 4
+                        file.write(f"Max HP: {max_health}\n") # 4
                         file.write(f"Gold: {gold}\n") # 5
                         file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
                         file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
@@ -198,7 +198,6 @@ def course_edit(name, char_class):
 
 # start of quiz functions
 def quiz(new_player):
-    global quiz_over
     print()
     if new_player:
         print("This is the Dungeons.\nHere you can take quizzes on certain subjects and level up.\nTry it.")
@@ -220,39 +219,40 @@ def quiz(new_player):
     quiz_main(subject)
 
 def quiz_main(subject):
-    global monster_slain, health, quiz_over
+    global monster_slain, max_health, quiz_over
     if not subject: # blank variable is False
         return
     print()
     dungeon_lvl = 1
     q_num = 1
+    temp_health = max_health
     while quiz_over == False:
         if monster_slain == True:
-            monster_name, monster_hp = difficulty(dungeon_lvl)
+            monster_name, monster_hp = monster(dungeon_lvl)
         if dungeon_lvl == 3:
             print(f"The {monster_name} looks at you.")
         else:
             print(f"The {monster_name} readies to attack.")
         correct, q_num = ask_question(subject, q_num)
-        quiz_over, monster_hp, monster_slain, dungeon_lvl = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject)
-        print(f"HP: {health}")
-    dungeon_over(dungeon_lvl)
+        quiz_over, monster_hp, monster_slain, dungeon_lvl = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health)
+        print(f"HP: {temp_health}")
+    quiz_over = dungeon_over(dungeon_lvl, q_num)
 
-def difficulty(dungeon_lvl):
+def monster(dungeon_lvl):
     print()
     match dungeon_lvl:
         case 1:
             print("You enter the dungeon.")
             monster_list = ["Slime 🧪 ", "Zombie 🧟 ", "Skeleton 🩻 "]
-            monster_hp = 3
+            monster_hp = 1
         case 2:
             print("You delve deeper into the dungeon.")
             monster_list = ["Big Slime 🧪 ", "Big Zombie 🧟 ", "Big Skeleton 🩻 "]
-            monster_hp = 5
+            monster_hp = 1
         case 3:
             print("You open the doors to the final chamber.")
             monster_list = ["Biggest Slime 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
-            monster_hp = 10
+            monster_hp = 1
         case 4:
             print("You cleared the Dungeon!")
     monster_name = random.choice(monster_list)
@@ -299,8 +299,8 @@ def load_questions(filename):
         correct_answer = int(correct_answer.strip())
     return question, choices, correct_answer
 
-def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject):
-    global humanity_dmg_mod, stem_dmg_mod, health
+def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health):
+    global humanity_dmg_mod, stem_dmg_mod, quiz_over
     if correct:
         if subject == "legal_studies" or "english":
             dmg = 1 + humanity_dmg_mod
@@ -316,21 +316,27 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject):
                 quiz_over = True
     else:
         dmg = dungeon_lvl
-        health -= dmg
+        temp_health -= dmg
         print(f"The {monster_name} damaged you by {dmg} points.")
         monster_slain = False
-        if health <= 0:
+        if temp_health <= 0:
             print(f"You were defeated by the {monster_name}")
             quiz_over = True
     return quiz_over, monster_hp, monster_slain, dungeon_lvl
 
-def dungeon_over(dungeon_lvl, quiz_over):
+def dungeon_over(dungeon_lvl, q_num):
+    global gold, exp, quiz_over
     if dungeon_lvl == 4:
         print("You cleared the dungeon.")
-        print("Rewards...")
+        exp_modifier = q_num + dungeon_lvl*5
+        gold_modifier = round((q_num + dungeon_lvl*2)/2)
     else:
         print("The dungeon cleared you...")
-        print("Rewards...")
+        exp_modifier = round((q_num + dungeon_lvl*5)/2)
+        gold_modifier = 0
+    print(f"You earned {exp_modifier} EXP\nYou earned {gold_modifier} gold.")
+    exp += exp_modifier
+    gold += gold_modifier
     quiz_over = False
 # end of quiz functions
 
@@ -339,12 +345,13 @@ def shop(new_player):
     print()
     if new_player:
         print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.\nTry it.")
-    print("blah")
+    # prolly use a file... one of those formatted ones to print em out.
 
 def quit_program():
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
     if confirmation == "Y":
+        print("See you later, adventurer!")
         sys.exit()
 
 # saves the player's stats every time the main menu is accessed
@@ -355,12 +362,13 @@ def save_game(name, char_class):
     if exp >= 100:
         exp -= 100
         level += 1
+        health += 1
     with open(filepath, "w") as file:
         file.write(f"Name: {name}\n") # 0
         file.write(f"Class: {char_class}\n") # 1
         file.write(f"Level: {level}\n") # 2
         file.write(f"Experience: {exp}\n") # 3
-        file.write(f"Max HP: {health}\n") # 4
+        file.write(f"Max HP: {max_health}\n") # 4
         file.write(f"Gold: {gold}\n") # 5
         file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
         file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
