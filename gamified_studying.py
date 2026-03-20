@@ -225,6 +225,8 @@ def quiz_main(subject):
     print()
     dungeon_lvl = 1
     q_num = 1
+    quiz_over = False
+    monster_slain = True
     temp_health = max_health
     while quiz_over == False:
         if monster_slain == True:
@@ -234,9 +236,9 @@ def quiz_main(subject):
         else:
             print(f"The {monster_name} readies to attack.")
         correct, q_num = ask_question(subject, q_num)
-        quiz_over, monster_hp, monster_slain, dungeon_lvl = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health)
+        quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health)
         print(f"HP: {temp_health}")
-    quiz_over = dungeon_over(dungeon_lvl, q_num)
+    dungeon_over(dungeon_lvl, q_num)
 
 def monster(dungeon_lvl):
     print()
@@ -244,15 +246,15 @@ def monster(dungeon_lvl):
         case 1:
             print("You enter the dungeon.")
             monster_list = ["Slime 🧪 ", "Zombie 🧟 ", "Skeleton 🩻 "]
-            monster_hp = 1
+            monster_hp = 2
         case 2:
             print("You delve deeper into the dungeon.")
             monster_list = ["Big Slime 🧪 ", "Big Zombie 🧟 ", "Big Skeleton 🩻 "]
-            monster_hp = 1
+            monster_hp = 4
         case 3:
             print("You open the doors to the final chamber.")
             monster_list = ["Biggest Slime 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
-            monster_hp = 1
+            monster_hp = 6
         case 4:
             print("You cleared the Dungeon!")
     monster_name = random.choice(monster_list)
@@ -322,7 +324,7 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_he
         if temp_health <= 0:
             print(f"You were defeated by the {monster_name}")
             quiz_over = True
-    return quiz_over, monster_hp, monster_slain, dungeon_lvl
+    return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
 def dungeon_over(dungeon_lvl, q_num):
     global gold, exp, quiz_over
@@ -337,7 +339,6 @@ def dungeon_over(dungeon_lvl, q_num):
     print(f"You earned {exp_modifier} EXP\nYou earned {gold_modifier} gold.")
     exp += exp_modifier
     gold += gold_modifier
-    quiz_over = False
 # end of quiz functions
 
 # uncompleted
@@ -356,13 +357,13 @@ def quit_program():
 
 # saves the player's stats every time the main menu is accessed
 def save_game(name, char_class):
-    global exp, level
+    global exp, level, max_health
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
     if exp >= 100:
         exp -= 100
         level += 1
-        health += 1
+        max_health += 1
     with open(filepath, "w") as file:
         file.write(f"Name: {name}\n") # 0
         file.write(f"Class: {char_class}\n") # 1
