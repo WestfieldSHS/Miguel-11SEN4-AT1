@@ -1,7 +1,7 @@
 # use debugging tools
 # record all errors
 
-import os, json, sys, random
+import os, json, sys, random, csv
 
 # global variables
 level = 1
@@ -347,6 +347,11 @@ def shop(new_player):
     if new_player:
         print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.\nTry it.")
     # prolly use a file... one of those formatted ones to print em out.
+    with open('11SEN_AT1_CSV.csv', newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            row[0].replace("-", " ")
+            print(''.join(row[0]))
 
 def quit_program():
     print()
