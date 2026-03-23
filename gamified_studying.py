@@ -347,11 +347,33 @@ def dungeon_over(dungeon_lvl, q_num):
 def shop(new_player):
     print()
     if new_player:
-        print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.\nTry it.")
+        print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.")
+        print("The Humanitarian stat modifies how much damage you deal in humanitarian dungeons\n(For Example, English or Legal Studies)")
+        print("The STEM stat modifies how much damage you deal in STEM dungeons.\n(For example, Maths and Physics)")
     with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile:
         print_shop_menu = from_csv(csvfile)
         print(print_shop_menu)
-        option = input("What do you want to purchase? ")
+    with open('11SEN_AT1_CSV.csv','r') as csvfile:
+        data = csvfile.readlines()
+        option = input("What do you want to purchase? ").title().strip()
+        n = len(option) # gets the length of the item name
+        for line in data:
+            if option in line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
+                item_info = list(line)
+                item_info
+                for _ in item_info:
+                    if _ != ",":
+                        word = "".join(_)
+                        print(word)
+                    #NOT WORKING AA  
+                print(f"Item Name: {item_info[:n]}")
+                print(f"Cost: {item_info[1]} gold")
+                print(f"Humanitarian Modifier: {item_info[2]}")
+                print(f"Stem Modifier: {item_info[3]}")
+                break
+
+def purchasing(option):
+    pass
 
 def quit_program():
     print()
