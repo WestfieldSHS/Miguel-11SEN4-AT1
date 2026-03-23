@@ -2,6 +2,7 @@
 # record all errors
 
 import os, json, sys, random, csv
+from prettytable import from_csv
 
 # global variables
 level = 1
@@ -74,6 +75,7 @@ def character_customisation():
     return name, char_class, new_player
 
 # use of os.path in these instances was taken from various forums
+# using the standard way of opening files did not work. used this function to find the exact location of the file.
 def filepath_finder(file_name):
     script_dir = os.path.dirname(os.path.abspath(__file__)) # returns the directory name of a normalized absolutized version of THIS file
     filepath = os.path.join(script_dir, file_name) # concantates the file_name to the end of the pathway to this file.
@@ -346,12 +348,10 @@ def shop(new_player):
     print()
     if new_player:
         print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.\nTry it.")
-    # prolly use a file... one of those formatted ones to print em out.
-    with open('11SEN_AT1_CSV.csv', newline='') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-        for row in spamreader:
-            row[0].replace("-", " ")
-            print(''.join(row[0]))
+    with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile:
+        print_shop_menu = from_csv(csvfile)
+        print(print_shop_menu)
+        option = input("What do you want to purchase? ")
 
 def quit_program():
     print()
@@ -369,6 +369,7 @@ def save_game(name, char_class):
         exp -= 100
         level += 1
         max_health += 1
+        print(f"You leveled up!\nYou are now level {level}.\nYour HP is now {max_health}.")
     with open(filepath, "w") as file:
         file.write(f"Name: {name}\n") # 0
         file.write(f"Class: {char_class}\n") # 1
@@ -382,10 +383,7 @@ def save_game(name, char_class):
 
 main()
 
-# reward system
-# ensure the hp doesnt change globally
-# give exp
 # shop
+# add colour (right or wrong, character stats, possible customisation, )
 # modify stats
-# rename things
 # complete
