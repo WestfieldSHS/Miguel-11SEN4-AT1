@@ -1,8 +1,17 @@
 # use debugging tools
 # record all errors
 
-import os, json, sys, random, csv
+import os, json, sys, random
 from prettytable import from_csv
+from rich.console import Console
+from rich.theme import Theme
+custom_theme = Theme({
+    "incorrect": "bold red",
+    "correct": "bold green",
+    "important": "bold blue",
+    "input": "bold yellow"
+})
+console = Console(theme=custom_theme)
 
 # global variables
 level = 1
@@ -85,7 +94,7 @@ def main_menu(name, char_class, new_player):
     while True:
         print()
         save_game(name, char_class)
-        print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest")
+        console.print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest", style="important")
         option = input("Where would you like to go? ").upper().strip()
         # standard method of choosing options across my program
         match option:
@@ -105,7 +114,7 @@ def notes(new_player, name, char_class):
     global courses
     print()
     if new_player: # only prints this tutorial message if the player is on their first playthrough
-        print("This is the Training Grounds,\nHere you can make notes on various subjects and recall them.\nTry it.")
+        console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
     while True:
         print("[A] Edit Courses\n[B] Go Back")
         if len(courses) == 0:
@@ -202,8 +211,8 @@ def course_edit(name, char_class):
 def quiz(new_player):
     print()
     if new_player:
-        print("This is the Dungeons.\nHere you can take quizzes on certain subjects and level up.\nTry it.")
-    print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Go Back")
+        console.print("This is the [important]Dungeons[/important].\nHere you can take [important]quizzes[/important] on certain subjects and [important]level[/important] up.\n[important]Try it[/important].")
+    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Go Back")
     option = input("What dungeon would you like to explore? ").upper().strip()
     match option:
         case "A":
@@ -310,7 +319,7 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_he
             dmg = 1 + humanity_dmg_mod
         else:
             dmg = 1 + stem_dmg_mod
-        print(f"You damaged {monster_name} by {dmg} points.")
+        console.print(f"You damaged {monster_name} by {dmg} points.", style="correct")
         monster_hp = monster_hp - dmg
         monster_slain = False
         if monster_hp <= 0:
@@ -321,21 +330,21 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_he
     else:
         dmg = dungeon_lvl
         temp_health -= dmg
-        print(f"The {monster_name} damaged you by {dmg} points.")
+        console.print(f"The {monster_name} damaged you by {dmg} points.", style="incorrect")
         monster_slain = False
         if temp_health <= 0:
-            print(f"You were defeated by the {monster_name}")
+            console.print(f"You were defeated by the {monster_name}.", style="incorrect")
             quiz_over = True
     return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
 def dungeon_over(dungeon_lvl, q_num):
     global gold, exp, quiz_over
     if dungeon_lvl == 4:
-        print("You cleared the dungeon.")
+        console.print("You cleared the dungeon.", style="correct")
         exp_modifier = q_num + dungeon_lvl*5
         gold_modifier = round((q_num + dungeon_lvl*2)/2)
     else:
-        print("The dungeon cleared you...")
+        console.print("The dungeon cleared you...", style="incorrect")
         exp_modifier = round((q_num + dungeon_lvl*5)/2)
         gold_modifier = 0
     print(f"You earned {exp_modifier} EXP\nYou earned {gold_modifier} gold.")
@@ -347,9 +356,9 @@ def dungeon_over(dungeon_lvl, q_num):
 def shop(new_player):
     print()
     if new_player:
-        print("This is the Marketplace.\nHere you can purchase items with the gold you get from the Dungeons.")
-        print("The Humanitarian stat modifies how much damage you deal in humanitarian dungeons\n(For Example, English or Legal Studies)")
-        print("The STEM stat modifies how much damage you deal in STEM dungeons.\n(For example, Maths and Physics)")
+        console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
+        console.print("The Humanitarian stat [important]modifies[/important] how much [important]damage you deal[/important] in humanitarian dungeons\n(For Example, English or Legal Studies)")
+        console.print("The STEM stat modifies how much damage you deal in STEM dungeons.\n(For example, Maths and Physics)")
     with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile:
         print_shop_menu = from_csv(csvfile)
         print(print_shop_menu)
@@ -379,7 +388,7 @@ def quit_program():
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
     if confirmation == "Y":
-        print("See you later, adventurer!")
+        console.print("See you later, adventurer!", style="important")
         sys.exit()
 
 # saves the player's stats every time the main menu is accessed
