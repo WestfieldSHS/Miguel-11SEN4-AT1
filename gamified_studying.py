@@ -19,8 +19,9 @@ exp = 0
 max_health = 5
 gold = 0
 courses = []
-humanity_dmg_mod = 0
-stem_dmg_mod = 0
+inventory = []
+humanity_mod = 0
+stem_mod = 0
 monster_slain = True
 quiz_over = False
 
@@ -32,7 +33,7 @@ def main():
     main_menu(name, char_class, new_player)
 
 def character_customisation():
-    global level, exp, gold, courses, max_health, humanity_dmg_mod, stem_dmg_mod
+    global level, exp, gold, courses, max_health, humanity_mod, stem_mod
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
     try:
@@ -52,8 +53,8 @@ def character_customisation():
             exp = int(data[3].split(": ")[1].strip())
             max_health = int(data[4].split(": ")[1].strip())
             gold = int(data[5].split(": ")[1].strip())
-            humanity_dmg_mod = int(data[6].split(": ")[1].strip())
-            stem_dmg_mod = int(data[7].split(": ")[1].strip())
+            humanity_mod = int(data[6].split(": ")[1].strip())
+            stem_mod = int(data[7].split(": ")[1].strip())
             courses = eval(data[8].split(": ")[1].strip()) # deals with the global courses variable
             new_player = False
     else:
@@ -67,17 +68,17 @@ def character_customisation():
                     char_class = input("What type of student are you? ").capitalize().strip()
                     if char_class in class_list:
                         if char_class == "Bard":
-                            humanity_dmg_mod = 1
+                            humanity_mod = 1
                         else:
-                            stem_dmg_mod = 1
+                            stem_mod = 1
                         file.write(f"Name: {name}\n") # 0
                         file.write(f"Class: {char_class}\n") # 1
                         file.write(f"Level: {level}\n") # 2
                         file.write(f"Experience: {exp}\n") # 3
                         file.write(f"Max HP: {max_health}\n") # 4
                         file.write(f"Gold: {gold}\n") # 5
-                        file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
-                        file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
+                        file.write(f"Humanitarian Expertise: {humanity_mod}\n") # 6
+                        file.write(f"STEM Expertise: {stem_mod}\n") # 7
                         file.write(f"Courses: {courses}") # 8
                         new_player = True
                         break
@@ -111,7 +112,8 @@ def main_menu(name, char_class, new_player):
                 quit_program()
 
 def notes(new_player, name, char_class):
-    global courses
+    global gold, courses
+    gold += 50
     print()
     if new_player: # only prints this tutorial message if the player is on their first playthrough
         console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
@@ -248,8 +250,9 @@ def quiz_main(subject):
             print(f"The {monster_name} readies to attack.")
         correct, q_num = ask_question(subject, q_num)
         quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health)
-        print(f"HP: {temp_health}")
-    dungeon_over(dungeon_lvl, q_num)
+        print_hp = "❤️ "*temp_health
+        print(f"HP: {print_hp}")
+    dungeon_over(dungeon_lvl, q_num, subject)
 
 def monster(dungeon_lvl):
     print()
@@ -313,20 +316,18 @@ def load_questions(filename):
     return question, choices, correct_answer
 
 def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health):
-    global humanity_dmg_mod, stem_dmg_mod, quiz_over
+    global quiz_over
     if correct:
-        if subject == "legal_studies" or "english":
-            dmg = 1 + humanity_dmg_mod
-        else:
-            dmg = 1 + stem_dmg_mod
-        console.print(f"You damaged {monster_name} by {dmg} points.", style="correct")
-        monster_hp = monster_hp - dmg
+        console.print(f"You damaged {monster_name}", style="correct")
+        monster_hp = monster_hp - 1
         monster_slain = False
         if monster_hp <= 0:
             dungeon_lvl += 1
             monster_slain = True
             if dungeon_lvl == 4:
                 quiz_over = True
+        print_monster_hp = "🖤 "*monster_hp
+        print(f"{monster_name} HP: {print_monster_hp}")
     else:
         dmg = dungeon_lvl
         temp_health -= dmg
@@ -337,11 +338,14 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_he
             quiz_over = True
     return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
-def dungeon_over(dungeon_lvl, q_num):
-    global gold, exp, quiz_over
+def dungeon_over(dungeon_lvl, q_num, subject):
+    global gold, exp, quiz_over, humanity_mod, stem_mod
     if dungeon_lvl == 4:
         console.print("You cleared the dungeon.", style="correct")
-        exp_modifier = q_num + dungeon_lvl*5
+        if subject == "legal_studies" or "english":
+            exp_modifier = q_num + dungeon_lvl*5 + humanity_mod
+        else:
+            exp_modifier = q_num + dungeon_lvl*5 + stem_mod
         gold_modifier = round((q_num + dungeon_lvl*2)/2)
     else:
         console.print("The dungeon cleared you...", style="incorrect")
@@ -359,30 +363,49 @@ def shop(new_player):
         console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
         console.print("The Humanitarian stat [important]modifies[/important] how much [important]damage you deal[/important] in humanitarian dungeons\n(For Example, English or Legal Studies)")
         console.print("The STEM stat modifies how much damage you deal in STEM dungeons.\n(For example, Maths and Physics)")
-    with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile:
-        print_shop_menu = from_csv(csvfile)
-        print(print_shop_menu)
-    with open('11SEN_AT1_CSV.csv','r') as csvfile:
-        data = csvfile.readlines()
-        option = input("What do you want to purchase? ").title().strip()
-        n = len(option) # gets the length of the item name
-        for line in data:
-            if option in line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
-                item_info = list(line)
-                item_info
-                for _ in item_info:
-                    if _ != ",":
-                        word = "".join(_)
-                        print(word)
-                    #NOT WORKING AA  
-                print(f"Item Name: {item_info[:n]}")
-                print(f"Cost: {item_info[1]} gold")
-                print(f"Humanitarian Modifier: {item_info[2]}")
-                print(f"Stem Modifier: {item_info[3]}")
+    while True:
+        print()
+        with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile:
+            print_shop_menu = from_csv(csvfile)
+            print(print_shop_menu)
+            print("Alternatively, [A] to exit.")
+        with open('11SEN_AT1_CSV.csv','r') as csvfile:
+            data = csvfile.readlines()
+            option = input("What do you want to purchase? ").title().strip()
+            if option == "A":
                 break
-
-def purchasing(option):
-    pass
+            n = len(option) # gets the length of the item name
+            for line in data:
+                if option in line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
+                    item_info = list()
+                    word = ""
+                    for character in line:
+                        if character != "," and character != line[-1]:
+                            word = word+character
+                        else:
+                            item_info.append(word)
+                            word = ""
+                    console.print(f"Name: {item_info[0]}", style="important")
+                    console.print(f"Humanitarian Modifier: {item_info[2]}", style="important")
+                    console.print(f"STEM Modifier: {item_info[3]}", style="important")
+                    confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
+                    if confirmation == "Y":
+                        if gold >= int(item_info[1]):
+                            purchasing(item_info)
+                        else: 
+                            print("You're too broke.")
+                        break
+                    else:
+                        break
+        
+def purchasing(item_info):
+    global gold, humanity_mod, stem_mod
+    inventory.append(item_info[0])
+    gold -= int(item_info[1])
+    humanity_mod += int(item_info[2])
+    stem_mod += int(item_info[3])
+    print("Purchased!")
+    print(inventory)
 
 def quit_program():
     print()
@@ -408,13 +431,12 @@ def save_game(name, char_class):
         file.write(f"Experience: {exp}\n") # 3
         file.write(f"Max HP: {max_health}\n") # 4
         file.write(f"Gold: {gold}\n") # 5
-        file.write(f"Humanitarian Expertise: {humanity_dmg_mod}\n") # 6
-        file.write(f"STEM Expertise: {stem_dmg_mod}\n") # 7
+        file.write(f"Humanitarian Expertise: {humanity_mod}\n") # 6
+        file.write(f"STEM Expertise: {stem_mod}\n") # 7
         file.write(f"Courses: {courses}") # 8
 
 main()
 
 # shop
-# add colour (right or wrong, character stats, possible customisation, )
 # modify stats
 # complete

@@ -1,9 +1,9 @@
 Name: Miguel #18
 Class: Artificer
 Level: 1
-Experience: 0
+Experience: 9
 Max HP: 5
 Gold: 0
-Humanitarian Expertise: 0
+Humanitarian Expertise: 4
 STEM Expertise: 1
 Courses: []
