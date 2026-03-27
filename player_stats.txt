@@ -1,9 +1,10 @@
-Name: Miguel #18
-Class: Artificer
+Name: Miguel #22
+Class: Bard
 Level: 1
-Experience: 9
+Experience: 44
 Max HP: 5
-Gold: 0
-Humanitarian Expertise: 4
-STEM Expertise: 1
+Gold: 64
+Humanitarian Expertise: 3
+STEM Expertise: 0
 Courses: []
+Inventory: ['English Sword']

@@ -1,7 +1,4 @@
-# use debugging tools
-# record all errors
-
-import os, json, sys, random
+import os, json, sys, random, datetime
 from prettytable import from_csv
 from rich.console import Console
 from rich.theme import Theme
@@ -9,7 +6,6 @@ custom_theme = Theme({
     "incorrect": "bold red",
     "correct": "bold green",
     "important": "bold blue",
-    "input": "bold yellow"
 })
 console = Console(theme=custom_theme)
 
@@ -25,28 +21,25 @@ stem_mod = 0
 monster_slain = True
 quiz_over = False
 
-def clear():
-    os.system("cls")
-
 def main():
     name, char_class, new_player = character_customisation()
     main_menu(name, char_class, new_player)
 
 def character_customisation():
-    global level, exp, gold, courses, max_health, humanity_mod, stem_mod
+    global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
     try:
         with open(filepath, "x"): # open for exclusive creation, failing if the file already exists
             print("No save file found. Creating one now...")
     except FileExistsError:
-        with open(filepath, "r") as file: # open for reading
+        with open(filepath, "r") as file: # if the file exists, opens for reading
             read_file = file.read()
             print("=====YOUR CHARACTER=====")
             print(read_file)
             print("========================")
         with open(filepath, "r") as file:
-            data = file.readlines()
+            data = file.readlines() # reads the file as a list, and uses indexing to assign variables
             name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of a list, seperated by the colon. saves the second part to the variable
             char_class = data[1].split(": ")[1].strip() # same thing but with the second line
             level = int(data[2].split(": ")[1].strip())
@@ -56,14 +49,15 @@ def character_customisation():
             humanity_mod = int(data[6].split(": ")[1].strip())
             stem_mod = int(data[7].split(": ")[1].strip())
             courses = eval(data[8].split(": ")[1].strip()) # deals with the global courses variable
+            inventory = eval(data[9].split(": ")[1].strip())
             new_player = False
     else:
-        with open(filepath, "w") as file: # creates a file and writes in it
+        with open(filepath, "w") as file: # if the file doesn't exist, creates a file and writes in it
             while True:
                 name = input("Please input your name. It must be between 2 and 16 characters: ").strip()
                 if 2 <= len(name) <= 16: # arbitrary name length
-                    print("Bard: Better at the Humanities")
-                    print("Artificer: Better at STEM.")
+                    console.print("[important]Bard[/important]: Better at the Humanities") # console print allows access to the rich module
+                    console.print("[important]Artificer[/important]: Better at STEM.")
                     class_list = ["Artificer", "Bard"]
                     char_class = input("What type of student are you? ").capitalize().strip()
                     if char_class in class_list:
@@ -71,6 +65,7 @@ def character_customisation():
                             humanity_mod = 1
                         else:
                             stem_mod = 1
+                        # writes the standard, global variables into the player stat file
                         file.write(f"Name: {name}\n") # 0
                         file.write(f"Class: {char_class}\n") # 1
                         file.write(f"Level: {level}\n") # 2
@@ -79,7 +74,8 @@ def character_customisation():
                         file.write(f"Gold: {gold}\n") # 5
                         file.write(f"Humanitarian Expertise: {humanity_mod}\n") # 6
                         file.write(f"STEM Expertise: {stem_mod}\n") # 7
-                        file.write(f"Courses: {courses}") # 8
+                        file.write(f"Courses: {courses}\n") # 8
+                        file.write(f"Inventory: {inventory}") # 9
                         new_player = True
                         break
     return name, char_class, new_player
@@ -113,11 +109,10 @@ def main_menu(name, char_class, new_player):
 
 def notes(new_player, name, char_class):
     global gold, courses
-    gold += 50
-    print()
-    if new_player: # only prints this tutorial message if the player is on their first playthrough
-        console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
     while True:
+        print()
+        if new_player: # only prints this tutorial message if the player is on their first playthrough
+            console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
         print("[A] Edit Courses\n[B] Go Back")
         if len(courses) == 0:
             print("You have no subjects. Add some!")
@@ -137,7 +132,7 @@ def notes(new_player, name, char_class):
 def note_revision(subject):
     global exp
     print()
-    filename = subject.lower() + ".txt"
+    filename = subject.lower() + "_notes.txt" # e.g legal_studies_notes.txt
     filepath = filepath_finder(filename)
     # loads existing file into the dict, or creates a new one.
     if os.path.exists(filepath): # checks to see if the path exists, returns a boolean statement 
@@ -153,13 +148,13 @@ def note_revision(subject):
     match option:
         case "A":
             print(f"Here are your notes for {subject}:")
-            if note_dict:
+            if note_dict: # not empty
                 for concept, notes in note_dict.items():
                     print(f"- {concept}: {notes}")
             else:
                 print("No notes yet.")
         case "B":
-            print("CTRL+Z to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
+            print("CTRL+Z/D to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
             while True:
                 try:
                     concept = input(f"Key concept for {subject}: ").strip().capitalize()
@@ -194,7 +189,7 @@ def course_edit(name, char_class):
             if subject in courses:
                 print(f"{subject} is already a part of your courses.")
             else:
-                file_name = subject.lower() + ".txt"
+                file_name = subject.lower() + "_notes.txt"
                 filepath = filepath_finder(file_name)
                 with open(filepath, "x"):
                     courses.append(subject) # appends the subject to the user's course list
@@ -204,10 +199,9 @@ def course_edit(name, char_class):
             if subject in courses:
                 courses.remove(subject)
                 print("The subject has been removed.")
-                os.remove(subject.lower() + ".txt") # removes the text file
+                os.remove(subject.lower() + "_notes.txt") # removes the text file
             else:
                 print("This subject is not a part of your courses.")
-    save_game(name, char_class)
 
 # start of quiz functions
 def quiz(new_player):
@@ -236,11 +230,12 @@ def quiz_main(subject):
     if not subject: # blank variable is False
         return
     print()
+    # re/sets all the necessary variables:
     dungeon_lvl = 1
     q_num = 1
     quiz_over = False
     monster_slain = True
-    temp_health = max_health
+    temp_health = max_health # creates a temporary, modifiable variable for use in the dungeons
     while quiz_over == False:
         if monster_slain == True:
             monster_name, monster_hp = monster(dungeon_lvl)
@@ -268,7 +263,7 @@ def monster(dungeon_lvl):
         case 3:
             print("You open the doors to the final chamber.")
             monster_list = ["Biggest Slime 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
-            monster_hp = 6
+            monster_hp = 10
         case 4:
             print("You cleared the Dungeon!")
     monster_name = random.choice(monster_list)
@@ -280,10 +275,10 @@ def ask_question(subject, q_num):
     filename = subject+"_questions.txt"
     question, choices, correct_answer = load_questions(filename)
     print()
-    choices = choices.replace('"', "").replace("[", "").replace("]", "") # removes the old formatting.
-    multiple_choice = choices.split(",") # due to commas being, you know, apart of grammar, this raises a bunch of errors if a comma is present IN the option itself
-    shuffled_multiple_choice = multiple_choice[:] # creates a duplicate of the list
-    random.shuffle(shuffled_multiple_choice)
+    choices = choices.replace('"', "").replace("[", "").replace("]", "") # removes the formatting used in the actual text file.
+    multiple_choice = choices.split(",") # due to commas being used to split the 3 variables, this raises a bunch of errors if a comma is present IN the option itself
+    shuffled_multiple_choice = multiple_choice[:] # [:] creates a duplicate of the entire list.
+    random.shuffle(shuffled_multiple_choice) # if a duplicate was not made, then the correct answer to all questions will be A, regardless of if thats true or not
     print(f"{q_num}. {question}")
     print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
     while True:
@@ -297,7 +292,7 @@ def ask_question(subject, q_num):
                 answer = shuffled_multiple_choice[2]
             case "D":
                 answer = shuffled_multiple_choice[3]
-        if answer == multiple_choice[correct_answer]:
+        if answer == multiple_choice[correct_answer]: # matches the answers. possibly unnecessary to include [correct_answer]. could have just had [0]
             correct = True
         else:
             correct = False
@@ -306,13 +301,13 @@ def ask_question(subject, q_num):
 
 def load_questions(filename):
     with open(filename, "r") as file:
-        lines = file.read().splitlines() # returns a list of the loaded file's lines
-        random_line = random.choice(lines)
-        question, rest = random_line.split(":", 1) # splits at the colon, max 1 time, creating 2 items
-        choices, correct_answer = rest.split("|") # further splits, creating 3 items in total
-        question = question.strip()
+        lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
+        random_line = random.choice(lines) # randomly chooses one of these lines and saves it to a variable
+        question, rest = random_line.split(":", 1) # splits this random variable into 2 variables, dividing it at the colon
+        choices, correct_answer = rest.split("|") # further splits, creating 3 items in total: the qurestion, choices, and correct answer
+        question = question.strip() # removes unnecessary spaces
         choices = choices.strip()
-        correct_answer = int(correct_answer.strip())
+        correct_answer = int(correct_answer.strip()) # is an integer that always equals zero, so that it can be used for indexing
     return question, choices, correct_answer
 
 def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health):
@@ -321,7 +316,7 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_he
         console.print(f"You damaged {monster_name}", style="correct")
         monster_hp = monster_hp - 1
         monster_slain = False
-        if monster_hp <= 0:
+        if monster_hp <= 0: # less than or equal too
             dungeon_lvl += 1
             monster_slain = True
             if dungeon_lvl == 4:
@@ -333,61 +328,64 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_he
         temp_health -= dmg
         console.print(f"The {monster_name} damaged you by {dmg} points.", style="incorrect")
         monster_slain = False
-        if temp_health <= 0:
+        if temp_health <= 0: # less than or equal too
             console.print(f"You were defeated by the {monster_name}.", style="incorrect")
             quiz_over = True
     return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
 def dungeon_over(dungeon_lvl, q_num, subject):
     global gold, exp, quiz_over, humanity_mod, stem_mod
-    if dungeon_lvl == 4:
+    if dungeon_lvl == 4: # multiple ways to check if user beat the dungeons. i chose this one since it seems easiest
         console.print("You cleared the dungeon.", style="correct")
         if subject == "legal_studies" or "english":
             exp_modifier = q_num + dungeon_lvl*5 + humanity_mod
+            gold_modifier = round((q_num + dungeon_lvl*2 + humanity_mod)/2)
         else:
             exp_modifier = q_num + dungeon_lvl*5 + stem_mod
-        gold_modifier = round((q_num + dungeon_lvl*2)/2)
+            gold_modifier = round((q_num + dungeon_lvl*2 + stem_mod)/2)
     else:
         console.print("The dungeon cleared you...", style="incorrect")
+        # could possibly add the humanity/stem exp mods
         exp_modifier = round((q_num + dungeon_lvl*5)/2)
-        gold_modifier = 0
+        gold_modifier = 0 # must be set for use in next few lines
     print(f"You earned {exp_modifier} EXP\nYou earned {gold_modifier} gold.")
     exp += exp_modifier
     gold += gold_modifier
 # end of quiz functions
 
-# uncompleted
 def shop(new_player):
+    global gold
     print()
     if new_player:
         console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
-        console.print("The Humanitarian stat [important]modifies[/important] how much [important]damage you deal[/important] in humanitarian dungeons\n(For Example, English or Legal Studies)")
-        console.print("The STEM stat modifies how much damage you deal in STEM dungeons.\n(For example, Maths and Physics)")
+        console.print("The Humanitarian stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in humanitarian dungeons\n(For Example, English or Legal Studies)")
+        console.print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
     while True:
-        print()
-        with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile:
-            print_shop_menu = from_csv(csvfile)
+        # deals with csv files, or comma seperated value files.
+        with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile: # encodes in UTF-8-sig which removes strange letters from the first cell
+            print_shop_menu = from_csv(csvfile) # prints the csv file in a table
             print(print_shop_menu)
             print("Alternatively, [A] to exit.")
         with open('11SEN_AT1_CSV.csv','r') as csvfile:
-            data = csvfile.readlines()
+            data = csvfile.readlines() # list of lines
             option = input("What do you want to purchase? ").title().strip()
-            if option == "A":
+            if option == "A" or "":
                 break
-            n = len(option) # gets the length of the item name
+            n = len(option) # gets the length of the item name. currently, if u entered (e.g) "M" it would print maths sword since M, (len=1) is equal to line[:1]
             for line in data:
-                if option in line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
-                    item_info = list()
-                    word = ""
+                if option == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
+                    item_info = list() # empty list
+                    word = "" # empty variable
                     for character in line:
-                        if character != "," and character != line[-1]:
-                            word = word+character
-                        else:
+                        if character != "," and character != line[-1]: # if the character isn't a comma or the last letter
+                            word = word+character # add onto the word
+                        else: # if it is, that indicates the end of the word or table row
                             item_info.append(word)
-                            word = ""
+                            word = "" # resets
                     console.print(f"Name: {item_info[0]}", style="important")
                     console.print(f"Humanitarian Modifier: {item_info[2]}", style="important")
                     console.print(f"STEM Modifier: {item_info[3]}", style="important")
+                    console.print(f"Current Gold: {gold} gold.", style="important")
                     confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
                     if confirmation == "Y":
                         if gold >= int(item_info[1]):
@@ -405,7 +403,6 @@ def purchasing(item_info):
     humanity_mod += int(item_info[2])
     stem_mod += int(item_info[3])
     print("Purchased!")
-    print(inventory)
 
 def quit_program():
     print()
@@ -419,7 +416,7 @@ def save_game(name, char_class):
     global exp, level, max_health
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
-    if exp >= 100:
+    if exp >= 100: # level up
         exp -= 100
         level += 1
         max_health += 1
@@ -433,10 +430,7 @@ def save_game(name, char_class):
         file.write(f"Gold: {gold}\n") # 5
         file.write(f"Humanitarian Expertise: {humanity_mod}\n") # 6
         file.write(f"STEM Expertise: {stem_mod}\n") # 7
-        file.write(f"Courses: {courses}") # 8
+        file.write(f"Courses: {courses}\n") # 8
+        file.write(f"Inventory: {inventory}")
 
 main()
-
-# shop
-# modify stats
-# complete

@@ -8,7 +8,6 @@ Katie is appearing in court to answer a charge of drug supply. The judge who is 
 Which of the following is not a part of the nature of justice?: [" Not Retrospective", "Accessibility", "Equality", "Fairness"] | 0
 What are laws?: [" set of rules imposed on all members of a society", "guiding principles on what´s right or wrong.", "principles that are important to the individual", "practices based on long-established traditions."] | 0
 What is tyranny?: [" when the government is in the hands of one person/party", "when there is an absence of government or law.", "where members vote for representatives.", "where the power is concentrated into a small group of elites."] | 0
-
 Which of the following is the main historic source of the common law?: [" King´s court", "The House of Commons", "Court of Chancery", "Equity courts"] | 0
 A judge in the Supreme Court is bound by decisions made in which court?: [" High Court", "Local Court", "Federal Court", "Land and Environment Court"] | 0
 Which of the following is an advantage of the doctrine of precedent?: [" It provides some degree of predictability in the legal system.", "It prevents the need for appeals.", "It applies to all courts in the court hierarchy.", "It requires judges to carefully consider cases."] | 0
@@ -19,7 +18,6 @@ When delegated legislation is in conflict with an established precedent, what ar
 The NSW Premier wants the courts to deny bail to people accused of offences involving guns. The Premier also believes that the sentences judges are imposing are too lenient. The Premier is unable to order the judges to impose harsher sentences because of which of the following?: [" The separation of powers", "The division of powers", "The doctrine of precedent", "Principles of natural justice".] | 0
 The House of Representatives may also be referred to as which of the following?: [" The people’s house", "The upper house", "The state’s house", "The house of review"] | 0
 Which of the following best describes the main role of parliament?: [" To make and change laws.", "To interpret legislation.", "To provide jobs for politicians.", "To not give tax cuts to oil companies."] | 0
-
 The Rome Statute of the International Criminal Court (2002) is an example of which of the following?: [" A treaty", "A court", "Statute law", "Common law"] | 0
 When will an international treaty become law in Australia?: [" When it is enacted into legislation", "When it is ratified", "When it is signed by Australia", "When it is approved by popular vote"] | 0
 Which of the following are considered to be a source of international law?: [" Legal decisions", "Non-government organisations", "Domestic instruments", "ATSI customary laws"] | 0
