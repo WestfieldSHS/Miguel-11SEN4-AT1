@@ -125,7 +125,7 @@ def notes(new_player, name, char_class):
             note_revision(subject)
         match subject:
             case "A":
-                course_edit(name, char_class)
+                course_edit()
             case "B":
                 return
 
@@ -179,7 +179,7 @@ def note_revision(subject):
         case "C":
             return
 
-def course_edit(name, char_class):
+def course_edit():
     print()
     print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back")
     option = input("What would you like to do? ").upper().strip()
