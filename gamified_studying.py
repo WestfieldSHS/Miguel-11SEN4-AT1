@@ -1,4 +1,4 @@
-import os, json, sys, random, datetime
+import os, json, sys, random
 from prettytable import from_csv
 from rich.console import Console
 from rich.theme import Theme
@@ -20,6 +20,9 @@ humanity_mod = 0
 stem_mod = 0
 monster_slain = True
 quiz_over = False
+
+def clear():
+    os.system("cls")
 
 def main():
     name, char_class, new_player = character_customisation()
@@ -88,15 +91,17 @@ def filepath_finder(file_name):
     return filepath
 
 def main_menu(name, char_class, new_player):
+    global gold
     while True:
         print()
         save_game(name, char_class)
         console.print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest", style="important")
         option = input("Where would you like to go? ").upper().strip()
+        clear()
         # standard method of choosing options across my program
         match option:
             case "A":
-                notes(new_player, name, char_class)
+                notes(new_player)
             case "B":
                 quiz(new_player)
             case "C":
@@ -105,9 +110,12 @@ def main_menu(name, char_class, new_player):
                 print()
                 character_customisation()
             case "Q":
-                quit_program()
+                quit_program(name)
+            case "BOOSTER":
+                print("GOLD.")
+                gold += 50
 
-def notes(new_player, name, char_class):
+def notes(new_player):
     global gold, courses
     while True:
         print()
@@ -354,7 +362,7 @@ def dungeon_over(dungeon_lvl, q_num, subject):
 # end of quiz functions
 
 def shop(new_player):
-    global gold
+    global gold, inventory
     print()
     if new_player:
         console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
@@ -365,36 +373,44 @@ def shop(new_player):
         with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile: # encodes in UTF-8-sig which removes strange letters from the first cell
             print_shop_menu = from_csv(csvfile) # prints the csv file in a table
             print(print_shop_menu)
-            print("Alternatively, [A] to exit.")
+            print("Alternatively, [A] to exit or [B] to sell.")
         with open('11SEN_AT1_CSV.csv','r') as csvfile:
             data = csvfile.readlines() # list of lines
             option = input("What do you want to purchase? ").title().strip()
             if option == "A" or "":
                 break
-            n = len(option) # gets the length of the item name. currently, if u entered (e.g) "M" it would print maths sword since M, (len=1) is equal to line[:1]
-            for line in data:
-                if option == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
-                    item_info = list() # empty list
-                    word = "" # empty variable
-                    for character in line:
-                        if character != "," and character != line[-1]: # if the character isn't a comma or the last letter
-                            word = word+character # add onto the word
-                        else: # if it is, that indicates the end of the word or table row
-                            item_info.append(word)
-                            word = "" # resets
-                    console.print(f"Name: {item_info[0]}", style="important")
-                    console.print(f"Humanitarian Modifier: {item_info[2]}", style="important")
-                    console.print(f"STEM Modifier: {item_info[3]}", style="important")
-                    console.print(f"Current Gold: {gold} gold.", style="important")
-                    confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
-                    if confirmation == "Y":
-                        if gold >= int(item_info[1]):
-                            purchasing(item_info)
-                        else: 
-                            print("You're too broke.")
-                        break
-                    else:
-                        break
+            if option == "B":
+                option = input("What do you want to sell? ")
+                if option in inventory:
+                    inventory.remove(option)
+                print(f"{option} sold.\n10 Gold acquired.")
+                gold += 10
+                print()
+            else:
+                n = len(option) # gets the length of the item name. currently, if u entered (e.g) "M" it would print maths sword since M, (len=1) is equal to line[:1]
+                for line in data:
+                    if option == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
+                        item_info = list() # empty list
+                        word = "" # empty variable
+                        for character in line:
+                            if character != "," and character != line[-1]: # if the character isn't a comma or the last letter
+                                word = word+character # add onto the word
+                            else: # if it is, that indicates the end of the word or table row
+                                item_info.append(word)
+                                word = "" # resets
+                        console.print(f"Name: {item_info[0]}", style="important")
+                        console.print(f"Humanitarian Modifier: {item_info[2]}", style="important")
+                        console.print(f"STEM Modifier: {item_info[3]}", style="important")
+                        console.print(f"Current Gold: {gold} gold.", style="important")
+                        confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
+                        if confirmation == "Y":
+                            if gold >= int(item_info[1]):
+                                purchasing(item_info)
+                            else: 
+                                print("You're too broke.")
+                            break
+                        else:
+                            break
         
 def purchasing(item_info):
     global gold, humanity_mod, stem_mod
@@ -404,11 +420,11 @@ def purchasing(item_info):
     stem_mod += int(item_info[3])
     print("Purchased!")
 
-def quit_program():
+def quit_program(name):
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
     if confirmation == "Y":
-        console.print("See you later, adventurer!", style="important")
+        console.print(f"See you later, {name}!", style="important")
         sys.exit()
 
 # saves the player's stats every time the main menu is accessed

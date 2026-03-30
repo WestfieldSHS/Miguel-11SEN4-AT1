@@ -1,10 +1,10 @@
-Name: Miguel #22
+Name: Miguel #23
 Class: Bard
 Level: 1
-Experience: 44
+Experience: 0
 Max HP: 5
-Gold: 64
-Humanitarian Expertise: 3
+Gold: 0
+Humanitarian Expertise: 1
 STEM Expertise: 0
 Courses: []
-Inventory: ['English Sword']
+Inventory: []
