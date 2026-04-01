@@ -1,10 +1,10 @@
-Name: Miguel #23
+Name: Miguel #24
 Class: Bard
 Level: 1
-Experience: 0
+Experience: 16
 Max HP: 5
 Gold: 0
 Humanitarian Expertise: 1
 STEM Expertise: 0
-Courses: []
+Courses: ['Maths']
 Inventory: []

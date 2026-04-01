@@ -196,6 +196,8 @@ def course_edit():
             subject = input("What subject would you like to add to your courses? ").capitalize().strip()
             if subject in courses:
                 print(f"{subject} is already a part of your courses.")
+            if subject == "A" or "B":
+                print("Please don't.")
             else:
                 file_name = subject.lower() + "_notes.txt"
                 filepath = filepath_finder(file_name)
@@ -270,7 +272,7 @@ def monster(dungeon_lvl):
             monster_hp = 4
         case 3:
             print("You open the doors to the final chamber.")
-            monster_list = ["Biggest Slime 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
+            monster_list = ["Dunston 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
             monster_hp = 10
         case 4:
             print("You cleared the Dungeon!")
