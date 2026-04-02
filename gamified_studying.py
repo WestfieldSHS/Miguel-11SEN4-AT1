@@ -25,10 +25,30 @@ def clear():
     os.system("cls")
 
 def main():
-    name, char_class, new_player = character_customisation()
-    main_menu(name, char_class, new_player)
+    print("Welcome to Academicon, a gamified-studying experience.")
+    print("[A] Create Save File\n[B] Load Existing File\n[C] Teacher Mode\n[D] Exit")
+    option = input("What would you like to do? ")
+    match option:
+        case "A":
+            save_name = input("Name your save file: ").strip()
+            name, char_class, new_player = character_customisation(save_name)
+            main_menu(name, char_class, new_player)
+        case "B":
+            save_name = input("Which save file do you want to load? ").strip()
+            name, char_class, new_player = character_customisation(save_name)
+            main_menu(name, char_class, new_player)
+        case "C":
+            print("Authentication required.")
+            password = input("Password: ")
+            if password == "1234":
+                teacher_menu()
+        case "D":
+            quit_program()
 
-def character_customisation():
+def teacher_menu():
+    print("Teacher mode.")
+
+def character_customisation(save_name):
     global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory
     file_name = "player_stats.txt"
     filepath = filepath_finder(file_name)
@@ -129,6 +149,7 @@ def notes(new_player):
         for unit in courses:
             print(f"- {unit}")
         subject = input("What subject would you like to study? Alternatively, you can Edit Courses or Go Back: ").capitalize().strip()
+        clear()
         if subject in courses:
             note_revision(subject)
         match subject:
@@ -144,15 +165,16 @@ def note_revision(subject):
     filepath = filepath_finder(filename)
     # loads existing file into the dict, or creates a new one.
     if os.path.exists(filepath): # checks to see if the path exists, returns a boolean statement 
-        with open(filepath, "r") as file:
+        with open(filepath, "r") as file: # if  it does exists, loads the file into a dictionary
             try:
                 note_dict = json.load(file) 
             except json.JSONDecodeError: # improper format for json to decode
                 note_dict = dict()
     else:
-        note_dict = dict() # converts the json file into a dict
+        note_dict = dict() # prepares an empty dictionary for later use
     print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
     option = input("What would you like to do? ").upper().strip()
+    clear()
     match option:
         case "A":
             print(f"Here are your notes for {subject}:")
@@ -167,6 +189,7 @@ def note_revision(subject):
                 try:
                     concept = input(f"Key concept for {subject}: ").strip().capitalize()
                 except EOFError: # raised when ctrl+z (windows) or ctrl+d (mac) is inputted
+                    clear()
                     break
                 else:
                     if "Remove " in concept:
@@ -191,6 +214,9 @@ def course_edit():
     print()
     print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back")
     option = input("What would you like to do? ").upper().strip()
+    clear()
+    for unit in courses:
+        print(f"- {unit}")
     match option:
         case "A":
             subject = input("What subject would you like to add to your courses? ").capitalize().strip()
@@ -220,6 +246,7 @@ def quiz(new_player):
         console.print("This is the [important]Dungeons[/important].\nHere you can take [important]quizzes[/important] on certain subjects and [important]level[/important] up.\n[important]Try it[/important].")
     console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Go Back")
     option = input("What dungeon would you like to explore? ").upper().strip()
+    clear()
     match option:
         case "A":
             subject = "maths"
@@ -254,7 +281,7 @@ def quiz_main(subject):
         else:
             print(f"The {monster_name} readies to attack.")
         correct, q_num = ask_question(subject, q_num)
-        quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health)
+        quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health)
         print_hp = "❤️ "*temp_health
         print(f"HP: {print_hp}")
     dungeon_over(dungeon_lvl, q_num, subject)
@@ -278,6 +305,8 @@ def monster(dungeon_lvl):
             print("You cleared the Dungeon!")
     monster_name = random.choice(monster_list)
     print(f"A {monster_name} appears before you")
+    print_monster_hp = "🖤 "*monster_hp
+    print(f"{monster_name} HP: {print_monster_hp}")
     return monster_name, monster_hp
 
 def ask_question(subject, q_num):
@@ -293,6 +322,7 @@ def ask_question(subject, q_num):
     print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
     while True:
         answer = input("Answer: ").upper().strip()
+        clear()
         match answer:
             case "A":
                 answer = shuffled_multiple_choice[0]
@@ -320,7 +350,7 @@ def load_questions(filename):
         correct_answer = int(correct_answer.strip()) # is an integer that always equals zero, so that it can be used for indexing
     return question, choices, correct_answer
 
-def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, subject, temp_health):
+def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
     global quiz_over
     if correct:
         console.print(f"You damaged {monster_name}", style="correct")
@@ -365,33 +395,35 @@ def dungeon_over(dungeon_lvl, q_num, subject):
 
 def shop(new_player):
     global gold, inventory
-    print()
     if new_player:
         console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
         console.print("The Humanitarian stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in humanitarian dungeons\n(For Example, English or Legal Studies)")
         console.print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
     while True:
+        print()
         # deals with csv files, or comma seperated value files.
         with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile: # encodes in UTF-8-sig which removes strange letters from the first cell
             print_shop_menu = from_csv(csvfile) # prints the csv file in a table
             print(print_shop_menu)
-            print("Alternatively, [A] to exit or [B] to sell.")
+            print("[A] Purchase\n[B] Sell\n[C] Leave")
         with open('11SEN_AT1_CSV.csv','r') as csvfile:
             data = csvfile.readlines() # list of lines
-            option = input("What do you want to purchase? ").title().strip()
-            if option == "A" or "":
+            option = input("What would you like to do? ").title().strip()
+            if option == "C":
                 break
-            if option == "B":
-                option = input("What do you want to sell? ")
-                if option in inventory:
-                    inventory.remove(option)
-                print(f"{option} sold.\n10 Gold acquired.")
-                gold += 10
-                print()
-            else:
-                n = len(option) # gets the length of the item name. currently, if u entered (e.g) "M" it would print maths sword since M, (len=1) is equal to line[:1]
+            elif option == "B":
+                item = input("What do you want to sell? ")
+                if item == "":
+                    console.print("Please input an item.", style="incorrect")
+                if item in inventory:
+                    inventory.remove(item)
+                    console.print(f"{item} sold.\n10 Gold acquired.", style="correct")
+                    gold += 10
+            elif option == "A":
+                item = input("What would you like to purchase? ")
+                n = len(item) # gets the length of the item name. currently, if u entered (e.g) "M" it would print maths sword since M, (len=1) is equal to line[:1]
                 for line in data:
-                    if option == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
+                    if item == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
                         item_info = list() # empty list
                         word = "" # empty variable
                         for character in line:
@@ -409,7 +441,7 @@ def shop(new_player):
                             if gold >= int(item_info[1]):
                                 purchasing(item_info)
                             else: 
-                                print("You're too broke.")
+                                console.print("You're too broke.", style="incorrect")
                             break
                         else:
                             break
@@ -426,7 +458,7 @@ def quit_program(name):
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
     if confirmation == "Y":
-        console.print(f"See you later, {name}!", style="important")
+        console.print(f"See you later, Adventurer!", style="important")
         sys.exit()
 
 # saves the player's stats every time the main menu is accessed

@@ -1,4 +1,0 @@
-{
-    "Numbers": "1-9",
-    "Trigonomerytr": "Triangles n shit"
-}
