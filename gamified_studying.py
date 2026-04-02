@@ -25,36 +25,64 @@ def clear():
     os.system("cls")
 
 def main():
-    print("Welcome to Academicon, a gamified-studying experience.")
-    print("[A] Create Save File\n[B] Load Existing File\n[C] Teacher Mode\n[D] Exit")
-    option = input("What would you like to do? ")
-    match option:
-        case "A":
-            save_name = input("Name your save file: ").strip()
-            name, char_class, new_player = character_customisation(save_name)
-            main_menu(name, char_class, new_player)
-        case "B":
-            save_name = input("Which save file do you want to load? ").strip()
-            name, char_class, new_player = character_customisation(save_name)
-            main_menu(name, char_class, new_player)
-        case "C":
-            print("Authentication required.")
-            password = input("Password: ")
-            if password == "1234":
-                teacher_menu()
-        case "D":
-            quit_program()
+    print("Welcome to the Academicon, a gamified-studying experience.")
+    while True:
+        print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[E] Exit")
+        option = input("What would you like to do? ").upper().strip()
+        match option:
+            case "A":
+                save_name = input("Name your save file: ").strip().lower()
+                save_name = save_name.replace(" ", "_") # adheres to the formatting of files
+                print()
+                name, char_class, new_player = character_customisation(save_name)
+                main_menu(name, char_class, new_player, save_name)
+            case "B":
+                list_save_files()
+                save_name = input("Which save file do you want to load? ").strip().lower()
+                save_name = save_name.replace(" ", "_")
+                print()
+                name, char_class, new_player = character_customisation(save_name)
+                main_menu(name, char_class, new_player, save_name)
+            case "C":
+                list_save_files()
+                save_name = input("Which save file do you want to delete? ").strip().lower()
+                save_name = save_name.replace(" ", "_")
+                try:
+                    os.remove(save_name + "_stats.txt") # removes the  file
+                except OSError:
+                    print("Save file not found.")
+            case "D":
+                print("Authentication required.")
+                password = input("Password: ")
+                if password == "1234":
+                    teacher_menu()
+            case "E":
+                print("Exiting Academicon...")
+                sys.exit()
+        clear()
+
+def list_save_files():
+    saves = []
+    for file in os.listdir(): # returns a list of all files and folders inside a directory
+        if file.endswith("_stats.txt"):
+            saves.append(file.replace("_stats.txt", ""))  # remove _stats.txt part
+    if not saves: # if list is empty
+        print("No save files found.")
+        return
+    print("Available save files:")
+    for save in saves:
+        print(f"- {save}")
 
 def teacher_menu():
     print("Teacher mode.")
 
 def character_customisation(save_name):
-    global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory
-    file_name = "player_stats.txt"
+    global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory, monster_slain, quiz_over
+    file_name = f"{save_name}_stats.txt" # this is where the program decides whether or not to create a new save file
     filepath = filepath_finder(file_name)
     try:
         with open(filepath, "x"): # open for exclusive creation, failing if the file already exists
-            print("No save file found. Creating one now...")
+            print("Creating new save file now...")
     except FileExistsError:
         with open(filepath, "r") as file: # if the file exists, opens for reading
             read_file = file.read()
@@ -75,6 +103,17 @@ def character_customisation(save_name):
             inventory = eval(data[9].split(": ")[1].strip())
             new_player = False
     else:
+        # re/sets all the global variables. if this wasnt here, then when u make a new save file, it will automatically have the previous ones' values
+        level = 1
+        exp = 0
+        max_health = 5
+        gold = 0
+        courses = []
+        inventory = []
+        humanity_mod = 0
+        stem_mod = 0
+        monster_slain = True
+        quiz_over = False
         with open(filepath, "w") as file: # if the file doesn't exist, creates a file and writes in it
             while True:
                 name = input("Please input your name. It must be between 2 and 16 characters: ").strip()
@@ -110,32 +149,32 @@ def filepath_finder(file_name):
     filepath = os.path.join(script_dir, file_name) # concantates the file_name to the end of the pathway to this file.
     return filepath
 
-def main_menu(name, char_class, new_player):
+def main_menu(name, char_class, new_player, save_name):
     global gold
     while True:
         print()
-        save_game(name, char_class)
+        save_game(name, char_class, save_name)
         console.print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest", style="important")
         option = input("Where would you like to go? ").upper().strip()
         clear()
         # standard method of choosing options across my program
         match option:
             case "A":
-                notes(new_player)
+                notes(new_player, save_name)
             case "B":
                 quiz(new_player)
             case "C":
                 shop(new_player)
             case "D":
                 print()
-                character_customisation()
+                character_customisation(save_name)
             case "Q":
-                quit_program(name)
+                quit_game(name)
             case "BOOSTER":
                 print("GOLD.")
                 gold += 50
 
-def notes(new_player):
+def notes(new_player, save_name):
     global gold, courses
     while True:
         print()
@@ -151,18 +190,18 @@ def notes(new_player):
         subject = input("What subject would you like to study? Alternatively, you can Edit Courses or Go Back: ").capitalize().strip()
         clear()
         if subject in courses:
-            note_revision(subject)
+            note_revision(subject, save_name)
         match subject:
             case "A":
-                course_edit()
+                course_edit(save_name)
             case "B":
                 return
 
-def note_revision(subject):
+def note_revision(subject, save_name):
     global exp
     print()
-    filename = subject.lower() + "_notes.txt" # e.g legal_studies_notes.txt
-    filepath = filepath_finder(filename)
+    file_name = f"{save_name}_" + subject.lower() + "_notes.txt" # e.g legal_studies_notes.txt
+    filepath = filepath_finder(file_name)
     # loads existing file into the dict, or creates a new one.
     if os.path.exists(filepath): # checks to see if the path exists, returns a boolean statement 
         with open(filepath, "r") as file: # if  it does exists, loads the file into a dictionary
@@ -210,7 +249,7 @@ def note_revision(subject):
         case "C":
             return
 
-def course_edit():
+def course_edit(save_name):
     print()
     print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back")
     option = input("What would you like to do? ").upper().strip()
@@ -222,10 +261,8 @@ def course_edit():
             subject = input("What subject would you like to add to your courses? ").capitalize().strip()
             if subject in courses:
                 print(f"{subject} is already a part of your courses.")
-            if subject == "A" or "B":
-                print("Please don't.")
             else:
-                file_name = subject.lower() + "_notes.txt"
+                file_name = f"{save_name}_" + subject.lower() + "_notes.txt"
                 filepath = filepath_finder(file_name)
                 with open(filepath, "x"):
                     courses.append(subject) # appends the subject to the user's course list
@@ -235,7 +272,7 @@ def course_edit():
             if subject in courses:
                 courses.remove(subject)
                 print("The subject has been removed.")
-                os.remove(subject.lower() + "_notes.txt") # removes the text file
+                os.remove(f"{save_name}_" + subject.lower() + "_notes.txt") # removes the text file
             else:
                 print("This subject is not a part of your courses.")
 
@@ -454,17 +491,18 @@ def purchasing(item_info):
     stem_mod += int(item_info[3])
     print("Purchased!")
 
-def quit_program(name):
+def quit_game(name):
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
     if confirmation == "Y":
-        console.print(f"See you later, Adventurer!", style="important")
-        sys.exit()
+        console.print(f"See you later, {name}!", style="important")
+        print()
+        main()
 
 # saves the player's stats every time the main menu is accessed
-def save_game(name, char_class):
+def save_game(name, char_class, save_name):
     global exp, level, max_health
-    file_name = "player_stats.txt"
+    file_name = f"{save_name}_stats.txt"
     filepath = filepath_finder(file_name)
     if exp >= 100: # level up
         exp -= 100
