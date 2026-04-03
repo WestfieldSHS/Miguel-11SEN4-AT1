@@ -28,7 +28,7 @@ def clear():
 def main():
     print("Welcome to the Academicon, a gamified-studying experience.")
     while True:
-        print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[E] Exit")
+        print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[Q] Exit")
         option = input("What would you like to do? ").upper().strip()
         clear()
         match option:
@@ -77,11 +77,11 @@ def main():
                 password = input("Password: ")
                 if password == "1234":
                     teacher_menu()
-            case "E":
+            case "Q":
                 print("Exiting Academicon...")
                 sys.exit()
 
-def list_save_files(remove_suffix, suffix):
+def list_save_files(remove_suffix, suffix): # does smth need to be removed, what needs to be detected and/or removed
     saves = []
     for file in os.listdir(): # returns a list of all files and folders inside a directory
         if file.endswith(suffix):
@@ -95,7 +95,7 @@ def list_save_files(remove_suffix, suffix):
 def teacher_menu():
     while True:
         print()
-        print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes\n[D] Quit")
+        print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes\n[Q] Exit")
         option = input("What would you like to do? ").strip().upper()
         clear()
         match option:
@@ -104,10 +104,11 @@ def teacher_menu():
                 if not saves: # if no save files
                     print("No students registered.")
                 for save in saves: # for every student, prints out their entire stats
-                    print()
+                    console.print("=======STUDENT=======", style="important")
                     with open(save, "r") as file:
                         read_file = file.read()
                         print(read_file)
+                console.print("=====================", style="important")
             case "B":
                 create_quiz()
             case "C":
@@ -120,12 +121,11 @@ def teacher_menu():
                         print(f"- {save}")
                 subject = input("Which quiz do you want to remove? ").strip().lower()
                 subject = subject.replace(" ", "_")
-                # need to also remove all the study note ones
                 try:
                     os.remove(subject + "_questions.txt") # removes the  file
                 except OSError:
                     print("Quiz not found.")
-            case "D":
+            case "Q":
                 main()
 
 def create_quiz():
@@ -180,6 +180,7 @@ def create_questions():
                 other_answer = input("Other answer: ").replace(",", "-").replace("'", "`")
                 multiple_choice_questions.append(other_answer)
             quiz_question.append(f" {multiple_choice_questions} | 0") # adheres to formatting for indexing
+            multiple_choice_questions.clear()
     return quiz_question
 
 # start of player/student specific functions
@@ -251,6 +252,8 @@ def character_customisation(save_name):
 
 # use of os.path in these instances was taken from various forums
 # using the standard way of opening files did not work. used this function to find the exact location of the file.
+# at the start of this project, this was a key function in getting my files, but later in the development stage, i rarely used it. 
+# i am unsure why it was so essential at the start, so much so that the program could not run without it.
 def filepath_finder(file_name):
     script_dir = os.path.dirname(os.path.abspath(__file__)) # returns the directory name of a normalized absolutized version of THIS file
     filepath = os.path.join(script_dir, file_name) # concantates the file_name to the end of the pathway to this file.
@@ -261,7 +264,7 @@ def main_menu(name, char_class, new_player, save_name):
     while True:
         print()
         save_game(name, char_class, save_name)
-        console.print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[Q] Rest", style="important")
+        console.print("[A] Training Grounds\n[B] Dungeons\n[C] Marketplace\n[D] Well of Reflection\n[E] Rest", style="important")
         option = input("Where would you like to go? ").upper().strip()
         clear()
         # standard method of choosing options across my program
@@ -275,7 +278,7 @@ def main_menu(name, char_class, new_player, save_name):
             case "D":
                 print()
                 character_customisation(save_name)
-            case "Q":
+            case "E":
                 quit_game(name)
             case "BOOSTER":
                 print("GOLD.")
@@ -388,7 +391,7 @@ def quiz(new_player):
     print()
     if new_player:
         console.print("This is the [important]Dungeons[/important].\nHere you can take [important]quizzes[/important] on certain subjects and [important]level[/important] up.\n[important]Try it[/important].")
-    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Go Back")
+    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Teacher-Made Quizzes\n[F] Go Back")
     option = input("What dungeon would you like to explore? ").upper().strip()
     clear()
     match option:
@@ -401,6 +404,13 @@ def quiz(new_player):
         case "D":
             subject = "english"
         case "E":
+            saves = list_save_files(True, "_questions.txt")
+            saves.remove("legal_studies") # should i have the program only show teacher made quizzes? and scrap the four pre-made ones?
+            for save in saves:
+                print(f"- {save}")
+            subject = input("Which quiz would you like to do? ").strip().lower()
+            subject = subject.replace(" ", "_")
+        case "F":
             return
         case _:
             subject = ""
@@ -458,7 +468,7 @@ def ask_question(subject, q_num):
     filename = subject+"_questions.txt"
     question, choices, correct_answer = load_questions(filename)
     print()
-    choices = choices.replace('"', "").replace("[", "").replace("]", "") # removes the formatting used in the actual text file.
+    choices = choices.replace('"', "").replace("[", "").replace("]", "").replace("'", "") # removes the formatting used in the actual text file.
     multiple_choice = choices.split(",") # due to commas being used to split the 3 variables, this raises a bunch of errors if a comma is present IN the option itself
     shuffled_multiple_choice = multiple_choice[:] # [:] creates a duplicate of the entire list.
     random.shuffle(shuffled_multiple_choice) # if a duplicate was not made, then the correct answer to all questions will be A, regardless of if thats true or not

@@ -1,0 +1,2 @@
+integer e.g: [' 1', 'A', 'False', '1.5'] | 0
+string e.g: [' A', '1', 'False', '1.5'] | 0
