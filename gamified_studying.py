@@ -29,6 +29,7 @@ def main():
     while True:
         print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[E] Exit")
         option = input("What would you like to do? ").upper().strip()
+        clear()
         match option:
             case "A":
                 save_name = input("Name your save file: ").strip().lower()
@@ -37,14 +38,27 @@ def main():
                 name, char_class, new_player = character_customisation(save_name)
                 main_menu(name, char_class, new_player, save_name)
             case "B":
-                list_save_files()
-                save_name = input("Which save file do you want to load? ").strip().lower()
-                save_name = save_name.replace(" ", "_")
-                print()
-                name, char_class, new_player = character_customisation(save_name)
-                main_menu(name, char_class, new_player, save_name)
+                saves = list_save_files(True)
+                if not saves: # if list is empty
+                    print("No save files found.")
+                else:
+                    print("Available save files:")
+                    for save in saves:
+                        print(f"- {save}")
+                    save_name = input("Which save file do you want to load? ").strip().lower()
+                    save_name = save_name.replace(" ", "_")
+                    print()
+                    if save_name in saves:
+                        name, char_class, new_player = character_customisation(save_name)
+                        main_menu(name, char_class, new_player, save_name)
             case "C":
-                list_save_files()
+                saves = list_save_files(True)
+                if not saves: # if list is empty
+                    print("No save files found.")
+                else:
+                    print("Available save files:")
+                    for save in saves:
+                        print(f"- {save}")
                 save_name = input("Which save file do you want to delete? ").strip().lower()
                 save_name = save_name.replace(" ", "_")
                 try:
@@ -59,22 +73,35 @@ def main():
             case "E":
                 print("Exiting Academicon...")
                 sys.exit()
-        clear()
 
-def list_save_files():
+def list_save_files(remove_suffix):
     saves = []
     for file in os.listdir(): # returns a list of all files and folders inside a directory
         if file.endswith("_stats.txt"):
-            saves.append(file.replace("_stats.txt", ""))  # remove _stats.txt part
-    if not saves: # if list is empty
-        print("No save files found.")
-        return
-    print("Available save files:")
-    for save in saves:
-        print(f"- {save}")
+            if remove_suffix:
+                saves.append(file.replace("_stats.txt", ""))  # remove _stats.txt part
+            else:
+                saves.append(file)
+    return saves
 
 def teacher_menu():
-    print("Teacher mode.")
+    while True:
+        print()
+        print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes")
+        option = input("What would you like to do? ")
+        clear()
+        match option:
+            case "A":
+                saves = list_save_files(False)
+                for save in saves:
+                    print()
+                    with open(save, "r") as file:
+                        read_file = file.read()
+                        print(read_file)
+            case "B":
+                pass
+            case "C":
+                pass
 
 def character_customisation(save_name):
     global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory, monster_slain, quiz_over
