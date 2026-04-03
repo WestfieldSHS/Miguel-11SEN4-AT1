@@ -61,6 +61,7 @@ def main():
                         print(f"- {save}")
                 save_name = input("Which save file do you want to delete? ").strip().lower()
                 save_name = save_name.replace(" ", "_")
+                # need to also remove all the study note ones
                 try:
                     os.remove(save_name + "_stats.txt") # removes the  file
                 except OSError:
@@ -98,6 +99,7 @@ def teacher_menu():
                     with open(save, "r") as file:
                         read_file = file.read()
                         print(read_file)
+            # NEED TO DO THIS
             case "B":
                 pass
             case "C":
