@@ -26,7 +26,8 @@ def clear():
     os.system("cls")
 
 def main():
-    print("Welcome to the Academicon, a gamified-studying experience.")
+    print("𝔚 𝔢𝔩𝔠𝔬𝔪𝔢 𝔱𝔬 𝔱𝔥𝔢 𝕬 𝖈𝖆𝖉𝖊𝖒𝖎𝖈𝖔𝖓, 𝔞 𝔤𝔞𝔪𝔦𝔣𝔦𝔢𝔡-𝔰𝔱𝔲𝔡𝔶𝔦𝔫𝔤 𝔢𝔵𝔭𝔢𝔯𝔦𝔢𝔫𝔠𝔢.") # in my tests the special characters do not get confused for ASCII characters
+    # however, some characters meld together if there isn't a space between them. I opted to use a smaller, invisible character over the standard " "
     while True:
         print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[Q] Exit")
         option = input("What would you like to do? ").upper().strip()
@@ -119,7 +120,10 @@ def teacher_menu():
                     print("Quizzes:")
                     for save in saves:
                         print(f"- {save}")
+                print("[Q] Return")
                 subject = input("Which quiz do you want to remove? ").strip().lower()
+                if subject == "q":
+                    teacher_menu()
                 subject = subject.replace(" ", "_")
                 try:
                     os.remove(subject + "_questions.txt") # removes the  file
@@ -129,7 +133,11 @@ def teacher_menu():
                 main()
 
 def create_quiz():
+    print("[Q] Return")
     subject = input("What subject is this? ").lower().strip()
+    subject_type = input("Is this a STEM or Humanitarian Subject? ")
+    if subject == "q":
+        return
     subject = subject.replace(" ", "_") # formatting
     count = 0
     if subject in ["legal_studies", "physics", "maths", "english"]:
