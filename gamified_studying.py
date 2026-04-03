@@ -21,6 +21,7 @@ stem_mod = 0
 monster_slain = True
 quiz_over = False
 
+# universal functions
 def clear():
     os.system("cls")
 
@@ -31,6 +32,7 @@ def main():
         option = input("What would you like to do? ").upper().strip()
         clear()
         match option:
+        # should the below code be modularised inside functions?
             case "A":
                 save_name = input("Name your save file: ").strip().lower()
                 save_name = save_name.replace(" ", "_") # adheres to the formatting of files
@@ -38,7 +40,7 @@ def main():
                 name, char_class, new_player = character_customisation(save_name)
                 main_menu(name, char_class, new_player, save_name)
             case "B":
-                saves = list_save_files(True)
+                saves = list_save_files(True, "_stats.txt")
                 if not saves: # if list is empty
                     print("No save files found.")
                 else:
@@ -46,13 +48,13 @@ def main():
                     for save in saves:
                         print(f"- {save}")
                     save_name = input("Which save file do you want to load? ").strip().lower()
-                    save_name = save_name.replace(" ", "_")
+                    save_name = save_name.replace(" ", "_") # fallback replacement if user doesnt
                     print()
                     if save_name in saves:
                         name, char_class, new_player = character_customisation(save_name)
                         main_menu(name, char_class, new_player, save_name)
             case "C":
-                saves = list_save_files(True)
+                saves = list_save_files(True, "_stats.txt")
                 if not saves: # if list is empty
                     print("No save files found.")
                 else:
@@ -66,6 +68,10 @@ def main():
                     os.remove(save_name + "_stats.txt") # removes the  file
                 except OSError:
                     print("Save file not found.")
+                else:
+                    for file in os.listdir(): # taken from list_save_files function, however condensed
+                        if file.startswith(save_name): # removal of files such as "player_maths_notes.txt"
+                            os.remove(file)
             case "D":
                 print("Authentication required.")
                 password = input("Password: ")
@@ -75,36 +81,108 @@ def main():
                 print("Exiting Academicon...")
                 sys.exit()
 
-def list_save_files(remove_suffix):
+def list_save_files(remove_suffix, suffix):
     saves = []
     for file in os.listdir(): # returns a list of all files and folders inside a directory
-        if file.endswith("_stats.txt"):
-            if remove_suffix:
-                saves.append(file.replace("_stats.txt", ""))  # remove _stats.txt part
+        if file.endswith(suffix):
+            if remove_suffix: # checks to see if the program wants to remove the suffix - boolean
+                saves.append(file.replace(suffix, ""))  # remove _stats.txt part
             else:
                 saves.append(file)
     return saves
 
+# start of teacher specific functions
 def teacher_menu():
     while True:
         print()
-        print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes")
-        option = input("What would you like to do? ")
+        print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes\n[D] Quit")
+        option = input("What would you like to do? ").strip().upper()
         clear()
         match option:
             case "A":
-                saves = list_save_files(False)
-                for save in saves:
+                saves = list_save_files(False, "_stats.txt")
+                if not saves: # if no save files
+                    print("No students registered.")
+                for save in saves: # for every student, prints out their entire stats
                     print()
                     with open(save, "r") as file:
                         read_file = file.read()
                         print(read_file)
-            # NEED TO DO THIS
             case "B":
-                pass
+                create_quiz()
             case "C":
-                pass
+                saves = list_save_files(True, "_questions.txt")
+                if not saves: # if list is empty
+                    print("No quizzes made.")
+                else:
+                    print("Quizzes:")
+                    for save in saves:
+                        print(f"- {save}")
+                subject = input("Which quiz do you want to remove? ").strip().lower()
+                subject = subject.replace(" ", "_")
+                # need to also remove all the study note ones
+                try:
+                    os.remove(subject + "_questions.txt") # removes the  file
+                except OSError:
+                    print("Quiz not found.")
+            case "D":
+                main()
 
+def create_quiz():
+    subject = input("What subject is this? ").lower().strip()
+    subject = subject.replace(" ", "_") # formatting
+    count = 0
+    if subject in ["legal_studies", "physics", "maths", "english"]:
+        print("Quizzes already made for these subjects.")
+        return
+    print("CTRL+Z/D to stop making the quiz.")
+    try:
+        with open(f"{subject}_questions.txt", "x"): # exclusive creation, fails if file exists
+            pass
+    except FileExistsError:
+        with open(f"{subject}_questions.txt", "a") as file: # appends to the file that already exists
+            quiz_question = create_questions()
+            file.write("\n") # does this to start on a fresh line in the file
+            for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
+                if count < 2: # 0, 1, 2, new line, repeat
+                    file.write(f"{line}")
+                    count += 1
+                else:
+                    file.write(f"\n{line}") # new question, new line
+                    count = 0
+    else:
+        with open(f"{subject}_questions.txt", "w") as file: # new file, so opens in write mode to create and write in it
+            quiz_question = create_questions()
+            for line in quiz_question:
+                if count < 2:
+                    file.write(f"{line}")
+                    count += 1
+                else:
+                    file.write(f"\n{line}")
+                    count = 0
+        
+def create_questions():
+    quiz_question = []
+    multiple_choice_questions = [] # seperate list for multiple choice questions since they are stored in a separate list in the questions txt file
+    while True:
+        print()
+        try:
+            question = input("Input Question: ").replace(",", "-").replace("'", "`") # adheres to _questions.txt formatting
+        except EOFError:
+            break
+        else:
+            question = question + ":" # more formatting
+            quiz_question.append(question)
+            correct_answer = input("Correct answer: ").replace(",", "-").replace("'", "`")
+            correct_answer = " " + correct_answer
+            multiple_choice_questions.append(correct_answer)
+            for _ in range(3): # underscore is a placeholder variable with no real meaning
+                other_answer = input("Other answer: ").replace(",", "-").replace("'", "`")
+                multiple_choice_questions.append(other_answer)
+            quiz_question.append(f" {multiple_choice_questions} | 0") # adheres to formatting for indexing
+    return quiz_question
+
+# start of player/student specific functions
 def character_customisation(save_name):
     global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory, monster_slain, quiz_over
     file_name = f"{save_name}_stats.txt" # this is where the program decides whether or not to create a new save file
