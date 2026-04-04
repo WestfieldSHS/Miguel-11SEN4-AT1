@@ -119,6 +119,7 @@ def teacher_menu():
                 else:
                     print("Quizzes:")
                     for save in saves:
+                        save = save.replace("_", " ")
                         print(f"- {save}")
                 print("[Q] Return")
                 subject = input("Which quiz do you want to remove? ").strip().lower()
@@ -135,10 +136,17 @@ def teacher_menu():
 def create_quiz():
     print("[Q] Return")
     subject = input("What subject is this? ").lower().strip()
-    subject_type = input("Is this a STEM or Humanitarian Subject? ")
     if subject == "q":
         return
     subject = subject.replace(" ", "_") # formatting
+    print("[A] STEM\n[B] Humanitarian")
+    while True:
+        subject_type = input("What type of subject is this? ").upper().strip()
+        if subject_type == "A":
+            subject_type = "stem"
+            break
+        elif subject_type == "B":
+            subject_type = "huma"
     count = 0
     if subject in ["legal_studies", "physics", "maths", "english"]:
         print("Quizzes already made for these subjects.")
@@ -160,6 +168,7 @@ def create_quiz():
                     count = 0
     else:
         with open(f"{subject}_questions.txt", "w") as file: # new file, so opens in write mode to create and write in it
+            file.write(f"{subject_type}\n")
             quiz_question = create_questions()
             for line in quiz_question:
                 if count < 2:
@@ -415,6 +424,7 @@ def quiz(new_player):
             saves = list_save_files(True, "_questions.txt")
             saves.remove("legal_studies") # should i have the program only show teacher made quizzes? and scrap the four pre-made ones?
             for save in saves:
+                save = save.replace("_", " ")
                 print(f"- {save}")
             subject = input("Which quiz would you like to do? ").strip().lower()
             subject = subject.replace(" ", "_")
@@ -442,11 +452,11 @@ def quiz_main(subject):
             print(f"The {monster_name} looks at you.")
         else:
             print(f"The {monster_name} readies to attack.")
-        correct, q_num = ask_question(subject, q_num)
+        correct, q_num, subject_type = ask_question(subject, q_num)
         quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health)
         print_hp = "❤️ "*temp_health
         print(f"HP: {print_hp}")
-    dungeon_over(dungeon_lvl, q_num, subject)
+    dungeon_over(dungeon_lvl, q_num, subject_type)
 
 def monster(dungeon_lvl):
     print()
@@ -473,8 +483,8 @@ def monster(dungeon_lvl):
 
 def ask_question(subject, q_num):
     global exp
-    filename = subject+"_questions.txt"
-    question, choices, correct_answer = load_questions(filename)
+    filename = f"{subject}_questions.txt"
+    question, choices, correct_answer, subject_type = load_questions(filename)
     print()
     choices = choices.replace('"', "").replace("[", "").replace("]", "").replace("'", "") # removes the formatting used in the actual text file.
     multiple_choice = choices.split(",") # due to commas being used to split the 3 variables, this raises a bunch of errors if a comma is present IN the option itself
@@ -499,18 +509,24 @@ def ask_question(subject, q_num):
         else:
             correct = False
         q_num += 1
-        return correct, q_num
+        return correct, q_num, subject_type
 
 def load_questions(filename):
     with open(filename, "r") as file:
         lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
+        if lines[0] == "stem": # checks to see if the first line is either stem or humanitarian
+            subject_type = "stem"
+            lines.remove("stem")
+        elif lines[0] == "huma":
+            subject_type = "humanitarian"
+            lines.remove("huma")
         random_line = random.choice(lines) # randomly chooses one of these lines and saves it to a variable
         question, rest = random_line.split(":", 1) # splits this random variable into 2 variables, dividing it at the colon
         choices, correct_answer = rest.split("|") # further splits, creating 3 items in total: the qurestion, choices, and correct answer
         question = question.strip() # removes unnecessary spaces
         choices = choices.strip()
         correct_answer = int(correct_answer.strip()) # is an integer that always equals zero, so that it can be used for indexing
-    return question, choices, correct_answer
+    return question, choices, correct_answer, subject_type
 
 def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
     global quiz_over
@@ -535,14 +551,14 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
             quiz_over = True
     return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
-def dungeon_over(dungeon_lvl, q_num, subject):
+def dungeon_over(dungeon_lvl, q_num, subject_type):
     global gold, exp, quiz_over, humanity_mod, stem_mod
     if dungeon_lvl == 4: # multiple ways to check if user beat the dungeons. i chose this one since it seems easiest
         console.print("You cleared the dungeon.", style="correct")
-        if subject == "legal_studies" or "english":
+        if subject_type == "humanitarian":
             exp_modifier = q_num + dungeon_lvl*5 + humanity_mod
             gold_modifier = round((q_num + dungeon_lvl*2 + humanity_mod)/2)
-        else:
+        elif subject_type == "stem":
             exp_modifier = q_num + dungeon_lvl*5 + stem_mod
             gold_modifier = round((q_num + dungeon_lvl*2 + stem_mod)/2)
     else:

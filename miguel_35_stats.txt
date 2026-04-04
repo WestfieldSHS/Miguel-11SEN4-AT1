@@ -1,9 +1,9 @@
 Name: Miguel #35
 Class: Artificer
 Level: 1
-Experience: 39
+Experience: 96
 Max HP: 5
-Gold: 13
+Gold: 25
 Humanitarian Expertise: 0
 STEM Expertise: 1
 Courses: ['Maths']

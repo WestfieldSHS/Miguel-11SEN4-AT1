@@ -1,3 +1,4 @@
+huma
 Which of the following is true in relation to laws?: [" Laws have justice as an ideal.", "Laws are always just.", "Unjust laws are invalid.", "Laws are not related to justice."] | 0
 The provision of legal aid addresses which of the following aspects of justice?: [" Access", "Equality", "Fairness", "Impartiality"] | 0
 In response to public pressure, a country passes a law decriminalising prostitution. This action is most likely to have occurred due to a change in which of the following?: [" Values", "Customs", "Procedural fairness", "Cultural expectations"] | 0

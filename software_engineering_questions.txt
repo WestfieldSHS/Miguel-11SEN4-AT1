@@ -1,2 +1,3 @@
-integer e.g: [' 1', 'A', 'False', '1.5'] | 0
-string e.g: [' A', '1', 'False', '1.5'] | 0
+stem
+Integer E.g: [' 14', '1.4', 'Fourteen', 'False'] | 0
+String E.g: [' Fourteen', '14', '1.4', 'False'] | 0
