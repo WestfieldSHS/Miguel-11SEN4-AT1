@@ -2,14 +2,14 @@ import os, json, sys, random
 from prettytable import from_csv
 from rich.console import Console
 from rich.theme import Theme
-custom_theme = Theme({
+custom_theme = Theme({ # keys are the names i assign to the values which are interpreted as different colours to print
     "incorrect": "bold red",
     "correct": "bold green",
     "important": "bold blue",
 })
 console = Console(theme=custom_theme)
 
-# global variables
+# global variables and their standard values
 level = 1
 exp = 0
 max_health = 5
@@ -23,11 +23,17 @@ quiz_over = False
 
 # universal functions
 def clear():
-    os.system("cls")
+    # patchwork method of checking if the program is being run on windows or mac
+    if os.system("cls") == 0: # if os.system("cls") works, which it does on windows, it returns a value of 0
+        os.system("cls") # in which case it runs os.system("cls")
+    elif os.system("cls") == 1: # if it fails, which it would on windows, it returns a value of 1
+        os.system("clear") # in which case it would run os.system("clear") instead, which works on mac and in codespaces
 
 def main():
-    print("𝔚 𝔢𝔩𝔠𝔬𝔪𝔢 𝔱𝔬 𝔱𝔥𝔢 𝕬 𝖈𝖆𝖉𝖊𝖒𝖎𝖈𝖔𝖓, 𝔞 𝔤𝔞𝔪𝔦𝔣𝔦𝔢𝔡-𝔰𝔱𝔲𝔡𝔶𝔦𝔫𝔤 𝔢𝔵𝔭𝔢𝔯𝔦𝔢𝔫𝔠𝔢.") # in my tests the special characters do not get confused for ASCII characters
-    # however, some characters meld together if there isn't a space between them. I opted to use a smaller, invisible character over the standard " "
+    # in my tests the special characters do not get confused for ASCII characters
+    # however, some characters meld together if there isn't a space between them. 
+    # I opted to use a smaller, invisible character over the standard " "
+    print("𝔚 𝔢𝔩𝔠𝔬𝔪𝔢 𝔱𝔬 𝔱𝔥𝔢 𝕬 𝖈𝖆𝖉𝖊𝖒𝖎𝖈𝖔𝖓, 𝔞 𝔤𝔞𝔪𝔦𝔣𝔦𝔢𝔡-𝔰𝔱𝔲𝔡𝔶𝔦𝔫𝔤 𝔢𝔵𝔭𝔢𝔯𝔦𝔢𝔫𝔠𝔢.")
     while True:
         print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[Q] Exit")
         option = input("What would you like to do? ").upper().strip()
@@ -35,27 +41,29 @@ def main():
         match option:
         # should the below code be modularised inside functions?
             case "A":
-                save_name = input("Name your save file: ").strip().lower()
+                save_name = input("Name your save file: ").lower().strip()
                 save_name = save_name.replace(" ", "_") # adheres to the formatting of files
                 print()
                 name, char_class, new_player = character_customisation(save_name)
                 main_menu(name, char_class, new_player, save_name)
             case "B":
                 saves = list_save_files(True, "_stats.txt")
-                if not saves: # if list is empty
+                if not saves: # if list is empty it returns a boolean statement ("false") that can be detected
                     print("No save files found.")
                 else:
                     print("Available save files:")
                     for save in saves:
                         print(f"- {save}")
-                    save_name = input("Which save file do you want to load? ").strip().lower()
-                    save_name = save_name.replace(" ", "_") # fallback replacement if user doesnt
+                    save_name = input("Which save file do you want to load? ").lower().strip()
+                    save_name = save_name.replace(" ", "_") # ensures user adds the underscores
                     print()
-                    if save_name in saves:
+                    if save_name in saves: # w/o this check, you could accidentally create save files
                         name, char_class, new_player = character_customisation(save_name)
                         main_menu(name, char_class, new_player, save_name)
             case "C":
                 saves = list_save_files(True, "_stats.txt")
+                # following lines of code would have been apart of the function, however the function was used in other places with minor changes.
+                # e.g different words, different format, etc.
                 if not saves: # if list is empty
                     print("No save files found.")
                 else:
@@ -64,13 +72,13 @@ def main():
                         print(f"- {save}")
                 save_name = input("Which save file do you want to delete? ").strip().lower()
                 save_name = save_name.replace(" ", "_")
-                # need to also remove all the study note ones
                 try:
-                    os.remove(save_name + "_stats.txt") # removes the  file
-                except OSError:
+                    os.remove(save_name + "_stats.txt") # removes the selected file without needing the user to type all of it
+                except OSError: # basic error that deals with i/o of the OS variety
                     print("Save file not found.")
                 else:
-                    for file in os.listdir(): # taken from list_save_files function, however condensed
+                    # taken from list_save_files function, however condensed and varied slightly
+                    for file in os.listdir():
                         if file.startswith(save_name): # removal of files such as "player_maths_notes.txt"
                             os.remove(file)
             case "D":
@@ -89,7 +97,7 @@ def list_save_files(remove_suffix, suffix): # does smth need to be removed, what
             if remove_suffix: # checks to see if the program wants to remove the suffix - boolean
                 saves.append(file.replace(suffix, ""))  # remove _stats.txt part
             else:
-                saves.append(file)
+                saves.append(file) # used in the teacher mode to properly open the saves  in read mode
     return saves
 
 # start of teacher specific functions
@@ -97,15 +105,16 @@ def teacher_menu():
     while True:
         print()
         print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes\n[Q] Exit")
-        option = input("What would you like to do? ").strip().upper()
+        option = input("What would you like to do? ").upper().strip()
         clear()
         match option:
+            # could be modularised as well
             case "A":
                 saves = list_save_files(False, "_stats.txt")
-                if not saves: # if no save files
+                if not saves:
                     print("No students registered.")
                 for save in saves: # for every student, prints out their entire stats
-                    console.print("=======STUDENT=======", style="important")
+                    console.print("=======STUDENT=======", style="important") # console.print allows for the use of styles
                     with open(save, "r") as file:
                         read_file = file.read()
                         print(read_file)
@@ -119,15 +128,15 @@ def teacher_menu():
                 else:
                     print("Quizzes:")
                     for save in saves:
-                        save = save.replace("_", " ")
+                        save = save.replace("_", " ") # can be removed. just looks nicer for this in my opinion
                         print(f"- {save}")
                 print("[Q] Return")
-                subject = input("Which quiz do you want to remove? ").strip().lower()
+                subject = input("Which quiz do you want to remove? ").lower().strip()
                 if subject == "q":
-                    teacher_menu()
+                    teacher_menu() # return would return the user to the user_menu
                 subject = subject.replace(" ", "_")
                 try:
-                    os.remove(subject + "_questions.txt") # removes the  file
+                    os.remove(subject + "_questions.txt")
                 except OSError:
                     print("Quiz not found.")
             case "Q":
@@ -137,9 +146,9 @@ def create_quiz():
     print("[Q] Return")
     subject = input("What subject is this? ").lower().strip()
     if subject == "q":
-        return
+        return # not in a while true statemeent, so break cannot be used
     subject = subject.replace(" ", "_") # formatting
-    print("[A] STEM\n[B] Humanitarian")
+    print("[A] STEM\n[B] Humanities")
     while True:
         subject_type = input("What type of subject is this? ").upper().strip()
         if subject_type == "A":
@@ -148,27 +157,27 @@ def create_quiz():
         elif subject_type == "B":
             subject_type = "huma"
     count = 0
-    if subject in ["legal_studies", "physics", "maths", "english"]:
+    if subject in ["legal_studies", "physics", "maths", "english"]: # could be removed
         print("Quizzes already made for these subjects.")
         return
-    print("CTRL+Z/D to stop making the quiz.")
+    print("CTRL+Z/D to stop making the quiz.") # ctrl+z/d raises an EOFError when inputted. depends on mac/windows
     try:
         with open(f"{subject}_questions.txt", "x"): # exclusive creation, fails if file exists
-            pass
+            pass # practically skips this line of code, taking the program to the else statement, however is required for the indentation of the open lines
     except FileExistsError:
         with open(f"{subject}_questions.txt", "a") as file: # appends to the file that already exists
             quiz_question = create_questions()
-            file.write("\n") # does this to start on a fresh line in the file
+            file.write("\n") # does this to start on a fresh line in the already-made file
             for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
                 if count < 2: # 0, 1, 2, new line, repeat
                     file.write(f"{line}")
                     count += 1
                 else:
-                    file.write(f"\n{line}") # new question, new line
+                    file.write(f"\n{line}") # new question, so creates a new line before writing
                     count = 0
     else:
         with open(f"{subject}_questions.txt", "w") as file: # new file, so opens in write mode to create and write in it
-            file.write(f"{subject_type}\n")
+            file.write(f"{subject_type}\n") # doesn't create a new line, instead assigns the subject type
             quiz_question = create_questions()
             for line in quiz_question:
                 if count < 2:
@@ -179,14 +188,14 @@ def create_quiz():
                     count = 0
         
 def create_questions():
-    quiz_question = []
+    quiz_question = [] # list so that all 3 parts of the quiz question are written to the file together
     multiple_choice_questions = [] # seperate list for multiple choice questions since they are stored in a separate list in the questions txt file
     while True:
         print()
         try:
             question = input("Input Question: ").replace(",", "-").replace("'", "`") # adheres to _questions.txt formatting
-        except EOFError:
-            break
+        except EOFError: # raised when user inputs ctrl+z or ctrl+d, depending on their os
+            break # terminates the while True loop
         else:
             question = question + ":" # more formatting
             quiz_question.append(question)
@@ -206,19 +215,22 @@ def character_customisation(save_name):
     file_name = f"{save_name}_stats.txt" # this is where the program decides whether or not to create a new save file
     filepath = filepath_finder(file_name)
     try:
-        with open(filepath, "x"): # open for exclusive creation, failing if the file already exists
+        with open(filepath, "x"): # opens file for exclusive creation, failing if the file already exists
             print("Creating new save file now...")
     except FileExistsError:
         with open(filepath, "r") as file: # if the file exists, opens for reading
+            # this is what the user sees when they input [D] in the main
             read_file = file.read()
             print("=====YOUR CHARACTER=====")
-            print(read_file)
+            print(read_file) # attempting to print(file.read()) actually prints nothing, interestingly enough
             print("========================")
+        # attempting to execute file.read() and file.readlines() under the same open... failed
         with open(filepath, "r") as file:
-            data = file.readlines() # reads the file as a list, and uses indexing to assign variables
-            name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of a list, seperated by the colon. saves the second part to the variable
+            # reads the file as a list, and uses indexing to assign variables
+            data = file.readlines() # turns the file to a list, where each line is a value
+            name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of another list, seperated by the colon. saves the second part to the variable
             char_class = data[1].split(": ")[1].strip() # same thing but with the second line
-            level = int(data[2].split(": ")[1].strip())
+            level = int(data[2].split(": ")[1].strip()) # same thing but converts to an integer
             exp = int(data[3].split(": ")[1].strip())
             max_health = int(data[4].split(": ")[1].strip())
             gold = int(data[5].split(": ")[1].strip())
@@ -228,6 +240,7 @@ def character_customisation(save_name):
             inventory = eval(data[9].split(": ")[1].strip())
             new_player = False
     else:
+        # if the save_name... file doesn't exist (user wants to make a new file), program executes the following
         # re/sets all the global variables. if this wasnt here, then when u make a new save file, it will automatically have the previous ones' values
         level = 1
         exp = 0
@@ -239,12 +252,12 @@ def character_customisation(save_name):
         stem_mod = 0
         monster_slain = True
         quiz_over = False
-        with open(filepath, "w") as file: # if the file doesn't exist, creates a file and writes in it
+        with open(filepath, "w") as file: # the file doesn't exist, opens the file in write mode which creates it
             while True:
                 name = input("Please input your name. It must be between 2 and 16 characters: ").strip()
                 if 2 <= len(name) <= 16: # arbitrary name length
-                    console.print("[important]Bard[/important]: Better at the Humanities") # console print allows access to the rich module
-                    console.print("[important]Artificer[/important]: Better at STEM.")
+                    console.print("[important]Bard[/important]: Better at the Humanities (English, History, Geography, etc).") # if only a certain part of a string needs to be highlighted, use [placeholder]text[/placeholder] to do so
+                    console.print("[important]Artificer[/important]: Better at STEM (Science, Technology, Engineering, Maths).")
                     class_list = ["Artificer", "Bard"]
                     char_class = input("What type of student are you? ").capitalize().strip()
                     if char_class in class_list:
@@ -259,7 +272,7 @@ def character_customisation(save_name):
                         file.write(f"Experience: {exp}\n") # 3
                         file.write(f"Max HP: {max_health}\n") # 4
                         file.write(f"Gold: {gold}\n") # 5
-                        file.write(f"Humanitarian Expertise: {humanity_mod}\n") # 6
+                        file.write(f"Humanities Expertise: {humanity_mod}\n") # 6
                         file.write(f"STEM Expertise: {stem_mod}\n") # 7
                         file.write(f"Courses: {courses}\n") # 8
                         file.write(f"Inventory: {inventory}") # 9
@@ -514,11 +527,11 @@ def ask_question(subject, q_num):
 def load_questions(filename):
     with open(filename, "r") as file:
         lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
-        if lines[0] == "stem": # checks to see if the first line is either stem or humanitarian
+        if lines[0] == "stem": # checks to see if the first line is either stem or Humanities
             subject_type = "stem"
             lines.remove("stem")
         elif lines[0] == "huma":
-            subject_type = "humanitarian"
+            subject_type = "Humanities"
             lines.remove("huma")
         random_line = random.choice(lines) # randomly chooses one of these lines and saves it to a variable
         question, rest = random_line.split(":", 1) # splits this random variable into 2 variables, dividing it at the colon
@@ -555,7 +568,7 @@ def dungeon_over(dungeon_lvl, q_num, subject_type):
     global gold, exp, quiz_over, humanity_mod, stem_mod
     if dungeon_lvl == 4: # multiple ways to check if user beat the dungeons. i chose this one since it seems easiest
         console.print("You cleared the dungeon.", style="correct")
-        if subject_type == "humanitarian":
+        if subject_type == "Humanities":
             exp_modifier = q_num + dungeon_lvl*5 + humanity_mod
             gold_modifier = round((q_num + dungeon_lvl*2 + humanity_mod)/2)
         elif subject_type == "stem":
@@ -575,7 +588,7 @@ def shop(new_player):
     global gold, inventory
     if new_player:
         console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
-        console.print("The Humanitarian stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in humanitarian dungeons\n(For Example, English or Legal Studies)")
+        console.print("The Humanities stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in Humanities dungeons\n(For Example, English or Legal Studies)")
         console.print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
     while True:
         print()
@@ -611,7 +624,7 @@ def shop(new_player):
                                 item_info.append(word)
                                 word = "" # resets
                         console.print(f"Name: {item_info[0]}", style="important")
-                        console.print(f"Humanitarian Modifier: {item_info[2]}", style="important")
+                        console.print(f"Humanities Modifier: {item_info[2]}", style="important")
                         console.print(f"STEM Modifier: {item_info[3]}", style="important")
                         console.print(f"Current Gold: {gold} gold.", style="important")
                         confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
@@ -657,7 +670,7 @@ def save_game(name, char_class, save_name):
         file.write(f"Experience: {exp}\n") # 3
         file.write(f"Max HP: {max_health}\n") # 4
         file.write(f"Gold: {gold}\n") # 5
-        file.write(f"Humanitarian Expertise: {humanity_mod}\n") # 6
+        file.write(f"Humanities Expertise: {humanity_mod}\n") # 6
         file.write(f"STEM Expertise: {stem_mod}\n") # 7
         file.write(f"Courses: {courses}\n") # 8
         file.write(f"Inventory: {inventory}")
