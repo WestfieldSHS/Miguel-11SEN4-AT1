@@ -306,7 +306,6 @@ def main_menu(name, char_class, new_player, save_name):
             case "C":
                 shop(new_player)
             case "D":
-                print()
                 character_customisation(save_name)
             case "E":
                 quit_game(name)
