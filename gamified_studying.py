@@ -24,6 +24,7 @@ quiz_over = False
 # universal functions
 def clear():
     # patchwork method of checking if the program is being run on windows or mac
+    # bcuz of this, mac users for a fraction of a second may see "'cls' is not a supported class..." or something, however it does not raise an error
     if os.system("cls") == 0: # if os.system("cls") works, which it does on windows, it returns a value of 0
         os.system("cls") # in which case it runs os.system("cls")
     elif os.system("cls") == 1: # if it fails, which it would on windows, it returns a value of 1
@@ -35,7 +36,7 @@ def main():
     # I opted to use a smaller, invisible character over the standard " "
     print("𝔚 𝔢𝔩𝔠𝔬𝔪𝔢 𝔱𝔬 𝔱𝔥𝔢 𝕬 𝖈𝖆𝖉𝖊𝖒𝖎𝖈𝖔𝖓, 𝔞 𝔤𝔞𝔪𝔦𝔣𝔦𝔢𝔡-𝔰𝔱𝔲𝔡𝔶𝔦𝔫𝔤 𝔢𝔵𝔭𝔢𝔯𝔦𝔢𝔫𝔠𝔢.")
     while True:
-        print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[Q] Exit")
+        console.print("[A] Create Save File\n[B] Load Existing File\n[C] Delete Save File\n[D] Teacher Mode\n[Q] Exit", style="important")
         option = input("What would you like to do? ").upper().strip()
         clear()
         match option:
@@ -104,7 +105,7 @@ def list_save_files(remove_suffix, suffix): # does smth need to be removed, what
 def teacher_menu():
     while True:
         print()
-        print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes\n[Q] Exit")
+        console.print("[A] View Student Stats\n[B] Create Quizzes\n[C] Remove Quizzes\n[Q] Exit", style="important")
         option = input("What would you like to do? ").upper().strip()
         clear()
         match option:
@@ -148,7 +149,7 @@ def create_quiz():
     if subject == "q":
         return # not in a while true statemeent, so break cannot be used
     subject = subject.replace(" ", "_") # formatting
-    print("[A] STEM\n[B] Humanities")
+    console.print("[A] STEM\n[B] Humanities", style="important")
     while True:
         subject_type = input("What type of subject is this? ").upper().strip()
         if subject_type == "A":
@@ -319,7 +320,7 @@ def notes(new_player, save_name):
         print()
         if new_player: # only prints this tutorial message if the player is on their first playthrough
             console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
-        print("[A] Edit Courses\n[B] Go Back")
+        console.print("[A] Edit Courses\n[B] Go Back", style="important")
         if len(courses) == 0:
             print("You have no subjects. Add some!")
         else:
@@ -350,7 +351,7 @@ def note_revision(subject, save_name):
                 note_dict = dict()
     else:
         note_dict = dict() # prepares an empty dictionary for later use
-    print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back")
+    console.print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back", style="important")
     option = input("What would you like to do? ").upper().strip()
     clear()
     match option:
@@ -390,7 +391,7 @@ def note_revision(subject, save_name):
 
 def course_edit(save_name):
     print()
-    print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back")
+    console.print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back", style="important")
     option = input("What would you like to do? ").upper().strip()
     clear()
     for unit in courses:
@@ -420,7 +421,7 @@ def quiz(new_player):
     print()
     if new_player:
         console.print("This is the [important]Dungeons[/important].\nHere you can take [important]quizzes[/important] on certain subjects and [important]level[/important] up.\n[important]Try it[/important].")
-    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Teacher-Made Quizzes\n[F] Go Back")
+    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Teacher-Made Quizzes\n[F] Go Back", style="important")
     option = input("What dungeon would you like to explore? ").upper().strip()
     clear()
     match option:
@@ -503,7 +504,7 @@ def ask_question(subject, q_num):
     shuffled_multiple_choice = multiple_choice[:] # [:] creates a duplicate of the entire list.
     random.shuffle(shuffled_multiple_choice) # if a duplicate was not made, then the correct answer to all questions will be A, regardless of if thats true or not
     print(f"{q_num}. {question}")
-    print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}")
+    console.print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}", style="important")
     while True:
         answer = input("Answer: ").upper().strip()
         clear()
@@ -595,7 +596,7 @@ def shop(new_player):
         with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile: # encodes in UTF-8-sig which removes strange letters from the first cell
             print_shop_menu = from_csv(csvfile) # prints the csv file in a table
             print(print_shop_menu)
-            print("[A] Purchase\n[B] Sell\n[C] Leave")
+            console.print("[A] Purchase\n[B] Sell\n[C] Leave", style = "important")
         with open('11SEN_AT1_CSV.csv','r') as csvfile:
             data = csvfile.readlines() # list of lines
             option = input("What would you like to do? ").title().strip()
@@ -611,30 +612,34 @@ def shop(new_player):
                     gold += 10
             elif option == "A":
                 item = input("What would you like to purchase? ")
-                n = len(item) # gets the length of the item name. currently, if u entered (e.g) "M" it would print maths sword since M, (len=1) is equal to line[:1]
+                n = len(item)
                 for line in data:
-                    if item == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name
-                        item_info = list() # empty list
-                        word = "" # empty variable
-                        for character in line:
-                            if character != "," and character != line[-1]: # if the character isn't a comma or the last letter
-                                word = word+character # add onto the word
-                            else: # if it is, that indicates the end of the word or table row
-                                item_info.append(word)
-                                word = "" # resets
-                        console.print(f"Name: {item_info[0]}", style="important")
-                        console.print(f"Humanities Modifier: {item_info[2]}", style="important")
-                        console.print(f"STEM Modifier: {item_info[3]}", style="important")
-                        console.print(f"Current Gold: {gold} gold.", style="important")
-                        confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
-                        if confirmation == "Y":
-                            if gold >= int(item_info[1]):
-                                purchasing(item_info)
-                            else: 
-                                console.print("You're too broke.", style="incorrect")
-                            break
-                        else:
-                            break
+                    print(f"{line}\n{len(line)}")
+                    if n+8 == len(line) or n+9 == len(line): # n is "item name" while line is: "item name,xx,x,x ", but it must also account for if the item price is 3 digits
+                        if item == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name since [:x] is 0 to x
+                            item_info = list() # empty list
+                            word = "" # empty variable
+                            for character in line:
+                                if character != "," and character != line[-1]: # if the character isn't a comma or the last letter. this only works since the last char is  technically" "
+                                    word = word+character # add onto the word
+                                else: # if it is, that indicates the end of the word or table row
+                                    item_info.append(word)
+                                    word = "" # resets
+                            console.print(f"Name: {item_info[0]}", style="important") # since item_info is a list, its values, or the items values, can be indexed
+                            console.print(f"Humanities Modifier: {item_info[2]}", style="important")
+                            console.print(f"STEM Modifier: {item_info[3]}", style="important")
+                            console.print(f"Current Gold: {gold} gold.", style="important")
+                            confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
+                            if confirmation == "Y":
+                                if gold < int(item_info[1]): # less than
+                                    console.print("You're too broke.", style="incorrect")
+                                elif item_info[0] in inventory:
+                                    console.print("You have already purchased this item!", style="incorrect")
+                                else: # structured like this to avoid too nested if statements
+                                    purchasing(item_info)
+                                break # send back to top of shop if user wishes to buy something else, cld be replaced with return to send them back to main
+                            else:
+                                break # send back to top of shop if user wishes to buy something else
         
 def purchasing(item_info):
     global gold, humanity_mod, stem_mod
@@ -647,7 +652,7 @@ def purchasing(item_info):
 def quit_game(name):
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
-    if confirmation == "Y":
+    if confirmation == "Y": # else no, user sent back to main menu
         console.print(f"See you later, {name}!", style="important")
         print()
         main()
@@ -657,12 +662,12 @@ def save_game(name, char_class, save_name):
     global exp, level, max_health
     file_name = f"{save_name}_stats.txt"
     filepath = filepath_finder(file_name)
-    if exp >= 100: # level up
+    if exp >= 100: # level up w/ stat changes
         exp -= 100
         level += 1
         max_health += 1
         print(f"You leveled up!\nYou are now level {level}.\nYour HP is now {max_health}.")
-    with open(filepath, "w") as file:
+    with open(filepath, "w") as file: # rewrites the file with the new stat values
         file.write(f"Name: {name}\n") # 0
         file.write(f"Class: {char_class}\n") # 1
         file.write(f"Level: {level}\n") # 2

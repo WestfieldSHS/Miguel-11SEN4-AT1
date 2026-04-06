@@ -4,7 +4,7 @@ Level: 1
 Experience: 96
 Max HP: 5
 Gold: 25
-Humanitarian Expertise: 0
+Humanities Expertise: 0
 STEM Expertise: 1
 Courses: ['Maths']
 Inventory: []
