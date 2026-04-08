@@ -114,6 +114,7 @@ def teacher_menu():
             case "A":
                 saves = list_save_files(False, "_stats.txt")
                 if not saves:
+                    console.print("=====================", style="important")
                     print("No students registered.")
                 for save in saves: # for every student, prints out their entire stats
                     console.print("=======STUDENT=======", style="important") 
@@ -124,14 +125,14 @@ def teacher_menu():
             case "B":
                 create_quiz()
             case "C":
-                saves = list_save_files(True, "_questions.txt")
-                if not saves: # if list is empty
+                quizzes = list_save_files(True, "_questions.txt")
+                if not quizzes: # if list is empty
                     print("No quizzes made.")
                 else:
                     print("Quizzes:")
-                    for save in saves:
-                        save = save.replace("_", " ") # can be removed. just looks nicer for this in my opinion
-                        print(f"- {save}")
+                    for quiz in quizzes:
+                        quiz = quiz.replace("_", " ") # can be removed. just looks nicer for this in my opinion
+                        print(f"- {quiz}")
                 print("[Q] Return")
                 subject = input("Which quiz do you want to remove? ").lower().strip()
                 if subject == "q":
@@ -158,14 +159,14 @@ def create_quiz():
             break
         elif subject_type == "B":
             subject_type = "huma"
+            break
     count = 0
     if subject in ["legal_studies", "physics", "maths", "english"]: # could be removed
         print("Quizzes already made for these subjects.")
         return
     print("CTRL+Z/D to stop making the quiz.") # ctrl+z/d raises an EOFError when inputted. depends on mac/windows
     try:
-        with open(f"{subject}_questions.txt", "x"): # exclusive creation, fails if file exists
-            pass # practically skips this line of code, taking the program to the else statement, however is required for the indentation of the open lines
+        open(f"{subject}_questions.txt", "x") # exclusive creation, fails if file exists
     except FileExistsError:
         with open(f"{subject}_questions.txt", "a") as file: # appends to the file that already exists
             quiz_question = create_questions()
