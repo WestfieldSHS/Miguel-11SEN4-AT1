@@ -22,6 +22,7 @@ monster_slain = True
 quiz_over = False
 
 # universal functions
+#FLOWED
 def clear():
     # patchwork method of checking if the program is being run on windows or mac
     # bcuz of this, mac users for a fraction of a second may see "'cls' is not a supported class..." or something, however it does not raise an error
@@ -30,6 +31,7 @@ def clear():
     elif os.system("cls") == 1: # if it fails, which it would on windows, it returns a value of 1
         os.system("clear") # in which case it would run os.system("clear") instead, which works on mac and in codespaces
 
+#FLOWED
 def main():
     # in my tests the special characters do not get confused for ASCII characters
     # however, some characters meld together if there isn't a space between them. 
@@ -92,6 +94,7 @@ def main():
                 print("Exiting Academicon...")
                 sys.exit()
 
+#FLOWED
 def list_save_files(remove_suffix, suffix): # does smth need to be removed, what needs to be detected and/or removed
     saves = []
     for file in os.listdir(): # returns a list of all files and folders inside a directory
@@ -103,6 +106,7 @@ def list_save_files(remove_suffix, suffix): # does smth need to be removed, what
     return saves
 
 # start of teacher specific functions
+#FLOWED
 def teacher_menu():
     while True:
         print()
@@ -145,6 +149,7 @@ def teacher_menu():
             case "Q":
                 main()
 
+#FLOWED
 def create_quiz():
     print("[Q] Return")
     subject = input("What subject is this? ").lower().strip()
@@ -171,24 +176,16 @@ def create_quiz():
         with open(f"{subject}_questions.txt", "a") as file: # appends to the file that already exists
             quiz_question = create_questions()
             file.write("\n") # does this to start on a fresh line in the already-made file
-            for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
-                if count < 2: # 0, 1, 2, new line, repeat
-                    file.write(f"{line}")
-                    count += 1
-                else:
-                    file.write(f"\n{line}") # new question, so creates a new line before writing
-                    count = 0
     else:
         with open(f"{subject}_questions.txt", "w") as file: # new file, so opens in write mode to create and write in it
             file.write(f"{subject_type}\n") # doesn't create a new line, instead assigns the subject type
-            quiz_question = create_questions()
-            for line in quiz_question:
-                if count < 2:
-                    file.write(f"{line}")
-                    count += 1
-                else:
-                    file.write(f"\n{line}")
-                    count = 0
+    for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
+        if count < 2: # 0, 1, 2, new line, repeat
+            file.write(f"{line}")
+            count += 1
+        else:
+            file.write(f"\n{line}") # new question, so creates a new line before writing
+            count = 0
         
 def create_questions():
     quiz_question = [] # list so that all 3 parts of the quiz question are written to the file together
@@ -287,8 +284,9 @@ def character_customisation(save_name):
 # using the standard way of opening files did not work. used this function to find the exact location of the file.
 # at the start of this project, this was a key function in getting my files, but later in the development stage, i rarely used it. 
 # i am unsure why it was so essential at the start, so much so that the program could not run without it.
+#FLOWED
 def filepath_finder(file_name):
-    script_dir = os.path.dirname(os.path.abspath(__file__)) # returns the directory name of a normalized absolutized version of THIS file
+    script_dir = os.path.dirname(os.path.abspath(__file__)) # returns the directory of a normalized absolutized version of THIS file
     filepath = os.path.join(script_dir, file_name) # concantates the file_name to the end of the pathway to this file.
     return filepath
 
