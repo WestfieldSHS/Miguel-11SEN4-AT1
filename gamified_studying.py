@@ -210,6 +210,7 @@ def create_questions():
             multiple_choice_questions.clear()
     return quiz_question
 
+# FLOWED
 # start of player/student specific functions
 def character_customisation(save_name):
     global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory, monster_slain, quiz_over
@@ -292,6 +293,7 @@ def filepath_finder(file_name):
     filepath = os.path.join(script_dir, file_name) # concantates the file_name to the end of the pathway to this file.
     return filepath
 
+#FLOWED
 def main_menu(name, char_class, new_player, save_name):
     global gold
     while True:
@@ -651,6 +653,7 @@ def purchasing(item_info):
     stem_mod += int(item_info[3])
     print("Purchased!")
 
+# FLOWED
 def quit_game(name):
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
@@ -659,6 +662,7 @@ def quit_game(name):
         print()
         main()
 
+# FLOWED
 # saves the player's stats every time the main menu is accessed
 def save_game(name, char_class, save_name):
     global exp, level, max_health
