@@ -82,6 +82,7 @@ def main():
                     print("Save file not found.")
                 else:
                     # taken from list_save_files function, however condensed and varied slightly
+                    print(f"{save_name} has been successfully deleted.")
                     for file in os.listdir():
                         if file.startswith(save_name): # removal of files such as "player_maths_notes.txt"
                             os.remove(file)
@@ -228,7 +229,7 @@ def character_customisation(save_name):
         with open(filepath, "r") as file:
             # reads the file as a list, and uses indexing to assign variables
             data = file.readlines() # turns the file to a list, where each line is a value
-            name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of another list, seperated by the colon. saves the second part to the variable
+            name = data[0].split(": ")[1].strip() # splits the first line of the file into 2 parts of another list, separated by the colon. the second part of this list is then stripped and saved to the variable
             char_class = data[1].split(": ")[1].strip() # same thing but with the second line
             level = int(data[2].split(": ")[1].strip()) # same thing but converts to an integer
             exp = int(data[3].split(": ")[1].strip())
@@ -248,23 +249,22 @@ def character_customisation(save_name):
         gold = 0
         courses = []
         inventory = []
-        humanity_mod = 0
-        stem_mod = 0
-        monster_slain = True
-        quiz_over = False
         with open(filepath, "w") as file: # the file doesn't exist, opens the file in write mode which creates it
             while True:
                 name = input("Please input your name. It must be between 2 and 16 characters: ").strip()
                 if 2 <= len(name) <= 16: # arbitrary name length
-                    console.print("[important]Bard[/important]: Better at the Humanities (English, History, Geography, etc).") # if only a certain part of a string needs to be highlighted, use [placeholder]text[/placeholder] to do so
-                    console.print("[important]Artificer[/important]: Better at STEM (Science, Technology, Engineering, Maths).")
-                    class_list = ["Artificer", "Bard"]
-                    char_class = input("What type of student are you? ").capitalize().strip()
-                    if char_class in class_list:
-                        if char_class == "Bard":
-                            humanity_mod = 1
-                        else:
+                    console.print("[important][A] Artificer[/important]: Better at STEM (Science, Technology, Engineering, Maths).") # if only a certain part of a string needs to be highlighted, use [placeholder]text[/placeholder] to do so
+                    console.print("[important][B] Bard[/important]: Better at the Humanities (English, History, Geography, etc).")
+                    option = input("What type of student are you? ").upper().strip()
+                    if option == "A" or option == "B": # if there were more options it would be handled differently
+                        if option == "A":
+                            char_class = "Artificer"
                             stem_mod = 1
+                            humanity_mod = 0
+                        elif option == "B":
+                            char_class = "Bard"
+                            humanity_mod = 1
+                            stem_mod = 0
                         # writes the standard, global variables into the player stat file
                         file.write(f"Name: {name}\n") # 0
                         file.write(f"Class: {char_class}\n") # 1
@@ -278,6 +278,8 @@ def character_customisation(save_name):
                         file.write(f"Inventory: {inventory}") # 9
                         new_player = True
                         break
+                    else:
+                        pass
     return name, char_class, new_player
 
 # use of os.path in these instances was taken from various forums
