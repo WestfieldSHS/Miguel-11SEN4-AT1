@@ -3,7 +3,7 @@ Class: Artificer
 Level: 1
 Experience: 96
 Max HP: 5
-Gold: 25
+Gold: 75
 Humanities Expertise: 0
 STEM Expertise: 1
 Courses: ['Maths']

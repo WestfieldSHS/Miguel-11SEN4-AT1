@@ -325,17 +325,18 @@ def notes(new_player, save_name):
         if new_player: # only prints this tutorial message if the player is on their first playthrough
             console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
         console.print("[A] Edit Courses\n[B] Go Back", style="important")
-        if len(courses) == 0:
+        if not len(courses):
             print("You have no subjects. Add some!")
         else:
             print("Here are your subjects:")
-        for unit in courses:
-            print(f"- {unit}")
+            for unit in courses:
+                print(f"- {unit}")
         subject = input("What subject would you like to study? Alternatively, you can Edit Courses or Go Back: ").capitalize().strip()
         clear()
         if subject in courses:
             note_revision(subject, save_name)
-        match subject:
+        option = subject
+        match option:
             case "A":
                 course_edit(save_name)
             case "B":
@@ -355,43 +356,44 @@ def note_revision(subject, save_name):
                 note_dict = dict()
     else:
         note_dict = dict() # prepares an empty dictionary for later use
-    console.print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back", style="important")
-    option = input("What would you like to do? ").upper().strip()
-    clear()
-    match option:
-        case "A":
-            print(f"Here are your notes for {subject}:")
-            if note_dict: # not empty
-                for concept, notes in note_dict.items():
-                    print(f"- {concept}: {notes}")
-            else:
-                print("No notes yet.")
-        case "B":
-            print("CTRL+Z/D to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
-            while True:
-                try:
-                    concept = input(f"Key concept for {subject}: ").strip().capitalize()
-                except EOFError: # raised when ctrl+z (windows) or ctrl+d (mac) is inputted
-                    clear()
-                    break
+    while True:
+        console.print(f"[A] View {subject} Notes\n[B] Edit {subject} Notes\n[C] Go Back", style="important")
+        option = input("What would you like to do? ").upper().strip()
+        clear()
+        match option:
+            case "A":
+                print(f"Here are your notes for {subject}:")
+                if note_dict: # not empty
+                    for concept, notes in note_dict.items(): # .items() returns the key and value of a dict as a tuple = (key1, value1), (key2, value2), etc
+                        print(f"- {concept}: {notes}")
                 else:
-                    if "Remove " in concept:
-                        concept = concept.replace("Remove ", "").capitalize() # deletes the remove keyword
-                        if concept in note_dict:
-                            del note_dict[concept] # deletes it from the dictionary
-                            print(f"{concept} removed from notes.")
-                        else:
-                            print("This concept is not in your notes.")
+                    print("No notes yet.")
+            case "B":
+                print("CTRL+Z/D to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
+                while True:
+                    try:
+                        concept = input(f"Key concept for {subject}: ").strip().capitalize()
+                    except EOFError: # raised when ctrl+z (windows) or ctrl+d (mac) is inputted
+                        clear()
+                        break
                     else:
-                        concept_notes = input("Notes for concept: ").strip()
-                        note_dict[concept] = concept_notes
-                        print(f"{concept} added to your {subject} notes.")
-                        exp += 1
-                    with open(filepath, "w") as file: # rewrites the entire file to update
-                        json.dump(note_dict, file, indent=4) # converts the note_dict object in the location of file, with 4 indents per line
-                    print()
-        case "C":
-            return
+                        if concept[:7] == "Remove ": #checks to see if the first 0-6 characters are equal to the item name since [:x] does not include x
+                            concept = concept.replace("Remove ", "").capitalize() # deletes the remove keyword
+                            if concept in note_dict:
+                                del note_dict[concept] # deletes it from the dictionary
+                                print(f"{concept} removed from notes.")
+                            else:
+                                print("This concept is not in your notes.")
+                        else:
+                            concept_notes = input("Notes for concept: ").strip()
+                            note_dict[concept] = concept_notes
+                            print(f"{concept} added to your {subject} notes.")
+                            exp += 1
+                        with open(filepath, "w") as file: # rewrites the entire file to update
+                            json.dump(note_dict, file, indent=4) # converts the note_dict object in the location of file, with 4 indents per line
+                        print()
+            case "C":
+                return
 
 def course_edit(save_name):
     print()
@@ -408,9 +410,9 @@ def course_edit(save_name):
             else:
                 file_name = f"{save_name}_" + subject.lower() + "_notes.txt"
                 filepath = filepath_finder(file_name)
-                with open(filepath, "x"):
-                    courses.append(subject) # appends the subject to the user's course list
-                    print(f"{subject} has been added to your courses.")
+                open(filepath, "x")
+                courses.append(subject) # appends the subject to the user's course list
+                print(f"{subject} has been added to your courses.")
         case "B":
             subject = input("What subject would you like to remove? ").capitalize().strip()
             if subject in courses:
@@ -615,12 +617,12 @@ def shop(new_player):
                     console.print(f"{item} sold.\n10 Gold acquired.", style="correct")
                     gold += 10
             elif option == "A":
-                item = input("What would you like to purchase? ")
-                n = len(item)
+                item = input("What would you like to purchase? ").title()
+                item_length = len(item) # doesn't start at 0. starts at 1
                 for line in data:
-                    print(f"{line}\n{len(line)}")
-                    if n+8 == len(line) or n+9 == len(line): # n is "item name" while line is: "item name,xx,x,x ", but it must also account for if the item price is 3 digits
-                        if item == line[:n]: #checks to see if the first n (length of the item) characters are equal to the item name since [:x] is 0 to x
+                    print(line[:item_length])
+                    if item_length+8 == len(line) or item_length+9 == len(line): # item_length is "item name" while line is: "item name,xx,x,x ", but it must also account for if the item price is 3 digits
+                        if item == line[:item_length]: # though [:x] indexes from 0-(x-1), item_length is derived from len() which doesn't start counting from zero, so the full length can be indexed    
                             item_info = list() # empty list
                             word = "" # empty variable
                             for character in line:

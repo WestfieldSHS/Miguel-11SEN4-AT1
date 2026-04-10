@@ -1,3 +1,5 @@
 {
-    "Numbers": "0-9"
+    "Numbers": "0-9",
+    "Remove": "Hello",
+    "Remover": "C:\\Users\\migue\\AppData\\Local\\Microsoft\\WindowsApps\\python3.11.exe \"c:/Users/migue/OneDrive - NSW Department of Education/SOFTWARE_ENGINGEERING/PROGRAMMING_FUNDAMENTALS/11SEN4 AT1/gamified_studying.py\""
 }
