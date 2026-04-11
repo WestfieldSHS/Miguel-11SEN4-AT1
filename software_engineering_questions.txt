@@ -1,6 +1,0 @@
-stem
-Integer E.g: [' 14', '1.4', 'Fourteen', 'False'] | 0
-String E.g: [' Fourteen', '14', '1.4', 'False'] | 0
-Boolean e.g: [' False', 'Fourteen', '14', '1.4'] | 0
-Float e.g: [' 1.4', 'False', 'Fourteen', '14'] | 0
-What coding language do we use: [' Python', 'C++', 'Java', 'HTML'] | 0

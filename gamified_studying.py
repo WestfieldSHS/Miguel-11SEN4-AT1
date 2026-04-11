@@ -84,8 +84,8 @@ def main():
                     # taken from list_save_files function, however condensed and varied slightly
                     print(f"{save_name} has been successfully deleted.")
                     for file in os.listdir():
-                        if file.startswith(save_name): # removal of files such as "player_maths_notes.txt"
-                            os.remove(file)
+                        if file.startswith(save_name):
+                            os.remove(file) # removal of files such as "player_maths_notes.txt"
             case "D":
                 print("Authentication required.")
                 password = input("Password: ")
@@ -175,18 +175,26 @@ def create_quiz():
         open(f"{subject}_questions.txt", "x") # exclusive creation, fails if file exists
     except FileExistsError:
         with open(f"{subject}_questions.txt", "a") as file: # appends to the file that already exists
-            quiz_question = create_questions()
             file.write("\n") # does this to start on a fresh line in the already-made file
+            quiz_question = create_questions()
+            for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
+                    if count < 2: # 0 Yes so Write, 1 Yes so Write, 2 No so New line, repeat
+                        file.write(f"{line}")
+                        count += 1
+                    else:
+                        file.write(f"\n{line}") # new question, so creates a new line before writing
+                        count = 0
     else:
         with open(f"{subject}_questions.txt", "w") as file: # new file, so opens in write mode to create and write in it
             file.write(f"{subject_type}\n") # doesn't create a new line, instead assigns the subject type
-    for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
-        if count < 2: # 0, 1, 2, new line, repeat
-            file.write(f"{line}")
-            count += 1
-        else:
-            file.write(f"\n{line}") # new question, so creates a new line before writing
-            count = 0
+            quiz_question = create_questions()
+            for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
+                if count < 2: # 0, 1, 2, new line, repeat
+                    file.write(f"{line}")
+                    count += 1
+                else:
+                    file.write(f"\n{line}") # new question, so creates a new line before writing
+                    count = 0
         
 def create_questions():
     quiz_question = [] # list so that all 3 parts of the quiz question are written to the file together
@@ -208,6 +216,7 @@ def create_questions():
                 multiple_choice_questions.append(other_answer)
             quiz_question.append(f" {multiple_choice_questions} | 0") # adheres to formatting for indexing
             multiple_choice_questions.clear()
+            print(quiz_question)
     return quiz_question
 
 # FLOWED
@@ -257,15 +266,16 @@ def character_customisation(save_name):
                     console.print("[important][A] Artificer[/important]: Better at STEM (Science, Technology, Engineering, Maths).") # if only a certain part of a string needs to be highlighted, use [placeholder]text[/placeholder] to do so
                     console.print("[important][B] Bard[/important]: Better at the Humanities (English, History, Geography, etc).")
                     option = input("What type of student are you? ").upper().strip()
-                    if option == "A" or option == "B": # if there were more options it would be handled differently
-                        if option == "A":
-                            char_class = "Artificer"
-                            stem_mod = 1
-                            humanity_mod = 0
-                        elif option == "B":
-                            char_class = "Bard"
-                            humanity_mod = 1
-                            stem_mod = 0
+                    if option == "A" or option == "B":
+                        match option:
+                            case "A":
+                                char_class = "Artificer"
+                                stem_mod = 1
+                                humanity_mod = 0
+                            case "B":
+                                char_class = "Bard"
+                                humanity_mod = 1
+                                stem_mod = 0
                         # writes the standard, global variables into the player stat file
                         file.write(f"Name: {name}\n") # 0
                         file.write(f"Class: {char_class}\n") # 1
@@ -279,8 +289,6 @@ def character_customisation(save_name):
                         file.write(f"Inventory: {inventory}") # 9
                         new_player = True
                         break
-                    else:
-                        pass
     return name, char_class, new_player
 
 # use of os.path in these instances was taken from various forums
@@ -318,6 +326,7 @@ def main_menu(name, char_class, new_player, save_name):
                 print("GOLD.")
                 gold += 50
 
+#FLOWED
 def notes(new_player, save_name):
     global gold, courses
     while True:
@@ -342,6 +351,7 @@ def notes(new_player, save_name):
             case "B":
                 return
 
+#FLOWED
 def note_revision(subject, save_name):
     global exp
     print()
@@ -395,6 +405,7 @@ def note_revision(subject, save_name):
             case "C":
                 return
 
+#FLOWED
 def course_edit(save_name):
     print()
     console.print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back", style="important")
@@ -590,63 +601,64 @@ def dungeon_over(dungeon_lvl, q_num, subject_type):
     gold += gold_modifier
 # end of quiz functions
 
+#FLOWED
 def shop(new_player):
     global gold, inventory
-    if new_player:
-        console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
-        console.print("The Humanities stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in Humanities dungeons\n(For Example, English or Legal Studies)")
-        console.print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
     while True:
-        print()
+        if new_player:
+            console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
+            console.print("The Humanities stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in Humanities dungeons\n(For Example, English or Legal Studies)")
+            console.print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
         # deals with csv files, or comma seperated value files.
         with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile: # encodes in UTF-8-sig which removes strange letters from the first cell
             print_shop_menu = from_csv(csvfile) # prints the csv file in a table
-            print(print_shop_menu)
-            console.print("[A] Purchase\n[B] Sell\n[C] Leave", style = "important")
+        print(print_shop_menu)
+        console.print("[A] Purchase\n[B] Sell\n[C] Leave", style = "important")
         with open('11SEN_AT1_CSV.csv','r') as csvfile:
             data = csvfile.readlines() # list of lines
-            option = input("What would you like to do? ").title().strip()
-            if option == "C":
-                break
-            elif option == "B":
-                item = input("What do you want to sell? ")
-                if item == "":
-                    console.print("Please input an item.", style="incorrect")
-                if item in inventory:
-                    inventory.remove(item)
-                    console.print(f"{item} sold.\n10 Gold acquired.", style="correct")
-                    gold += 10
-            elif option == "A":
-                item = input("What would you like to purchase? ").title()
-                item_length = len(item) # doesn't start at 0. starts at 1
-                for line in data:
-                    print(line[:item_length])
-                    if item_length+8 == len(line) or item_length+9 == len(line): # item_length is "item name" while line is: "item name,xx,x,x ", but it must also account for if the item price is 3 digits
-                        if item == line[:item_length]: # though [:x] indexes from 0-(x-1), item_length is derived from len() which doesn't start counting from zero, so the full length can be indexed    
-                            item_info = list() # empty list
-                            word = "" # empty variable
-                            for character in line:
-                                if character != "," and character != line[-1]: # if the character isn't a comma or the last letter. this only works since the last char is  technically" "
-                                    word = word+character # add onto the word
-                                else: # if it is, that indicates the end of the word or table row
-                                    item_info.append(word)
-                                    word = "" # resets
-                            console.print(f"Name: {item_info[0]}", style="important") # since item_info is a list, its values, or the items values, can be indexed
-                            console.print(f"Humanities Modifier: {item_info[2]}", style="important")
-                            console.print(f"STEM Modifier: {item_info[3]}", style="important")
-                            console.print(f"Current Gold: {gold} gold.", style="important")
-                            confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
-                            if confirmation == "Y":
-                                if gold < int(item_info[1]): # less than
-                                    console.print("You're too broke.", style="incorrect")
-                                elif item_info[0] in inventory:
-                                    console.print("You have already purchased this item!", style="incorrect")
-                                else: # structured like this to avoid too nested if statements
-                                    purchasing(item_info)
-                                break # send back to top of shop if user wishes to buy something else, cld be replaced with return to send them back to main
-                            else:
-                                break # send back to top of shop if user wishes to buy something else
-        
+            option = input("What would you like to do? ").upper().strip()
+            match option:
+                case "C":
+                    break
+                case "B":
+                    item = input("What do you want to sell? ")
+                    if item == "":
+                        console.print("Please input an item.", style="incorrect")
+                    if item in inventory:
+                        inventory.remove(item)
+                        console.print(f"{item} sold.\n10 Gold acquired.", style="correct")
+                        gold += 10
+                case "A":
+                    item = input("What would you like to purchase? ").title().strip()
+                    item_length = len(item) # doesn't start at 0. starts at 1
+                    for line in data:
+                        if item_length+8 == len(line) or item_length+9 == len(line): # item_length is "item name" while line is: "item name,xx,x,x ", but it must also account for if the item price is 3 digits
+                            if item == line[:item_length]: # though [:x] indexes from 0-(x-1), item_length is derived from len() which doesn't start counting from zero, so the full length can be indexed    
+                                item_info = list() # empty list
+                                word = "" # empty variable
+                                for character in line:
+                                    if character != "," and character != line[-1]: # if the character isn't a comma or the last letter. this only works since the last char is  technically" "
+                                        word = word+character # add onto the word
+                                    else: # if it is, that indicates the end of the word or table row
+                                        item_info.append(word)
+                                        word = "" # resets
+                                console.print(f"Name: {item_info[0]}", style="important") # since item_info is a list, its values, or the items values, can be indexed
+                                console.print(f"Humanities Modifier: {item_info[2]}", style="important")
+                                console.print(f"STEM Modifier: {item_info[3]}", style="important")
+                                console.print(f"Current Gold: {gold} gold.", style="important")
+                                confirmation = input(f"This costs {item_info[1]} Gold. Are you sure you want to purchase this? (Y/N) ").strip().upper()
+                                if confirmation == "Y":
+                                    if gold < int(item_info[1]): # less than
+                                        console.print("You're too broke.", style="incorrect")
+                                    elif item_info[0] in inventory:
+                                        console.print("You have already purchased this item!", style="incorrect")
+                                    else: # structured like this to avoid too nested if statements
+                                        purchasing(item_info)
+                                    break # send back to top of shop if user wishes to buy something else, cld be replaced with return to send them back to main
+                                else:
+                                    break # send back to top of shop if user wishes to buy something else
+
+#FLOWED     
 def purchasing(item_info):
     global gold, humanity_mod, stem_mod
     inventory.append(item_info[0])
