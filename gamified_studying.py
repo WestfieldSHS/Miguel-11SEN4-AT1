@@ -222,7 +222,7 @@ def create_questions():
 # FLOWED
 # start of player/student specific functions
 def character_customisation(save_name):
-    global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory, monster_slain, quiz_over
+    global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory
     file_name = f"{save_name}_stats.txt" # this is where the program decides whether or not to create a new save file
     filepath = filepath_finder(file_name)
     try:
