@@ -22,7 +22,6 @@ monster_slain = True
 quiz_over = False
 
 # universal functions
-#FLOWED
 def clear():
     # patchwork method of checking if the program is being run on windows or mac
     # bcuz of this, mac users for a fraction of a second may see "'cls' is not a supported class..." or something, however it does not raise an error
@@ -31,7 +30,6 @@ def clear():
     elif os.system("cls") == 1: # if it fails, which it would on windows, it returns a value of 1
         os.system("clear") # in which case it would run os.system("clear") instead, which works on mac and in codespaces
 
-#FLOWED
 def main():
     # in my tests the special characters do not get confused for ASCII characters
     # however, some characters meld together if there isn't a space between them. 
@@ -95,7 +93,6 @@ def main():
                 print("Exiting Academicon...")
                 sys.exit()
 
-#FLOWED
 def list_save_files(remove_suffix, suffix): # does smth need to be removed, what needs to be detected and/or removed
     saves = []
     for file in os.listdir(): # returns a list of all files and folders inside a directory
@@ -107,7 +104,6 @@ def list_save_files(remove_suffix, suffix): # does smth need to be removed, what
     return saves
 
 # start of teacher specific functions
-#FLOWED
 def teacher_menu():
     while True:
         print()
@@ -150,7 +146,6 @@ def teacher_menu():
             case "Q":
                 main()
 
-#FLOWED
 def create_quiz():
     print("[Q] Return")
     subject = input("What subject is this? ").lower().strip()
@@ -164,7 +159,7 @@ def create_quiz():
             subject_type = "stem"
             break
         elif subject_type == "B":
-            subject_type = "huma"
+            subject_type = "humanity"
             break
     count = 0
     if subject in ["legal_studies", "physics", "maths", "english"]: # could be removed
@@ -219,7 +214,6 @@ def create_questions():
             print(quiz_question)
     return quiz_question
 
-# FLOWED
 # start of player/student specific functions
 def character_customisation(save_name):
     global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory
@@ -295,13 +289,11 @@ def character_customisation(save_name):
 # using the standard way of opening files did not work. used this function to find the exact location of the file.
 # at the start of this project, this was a key function in getting my files, but later in the development stage, i rarely used it. 
 # i am unsure why it was so essential at the start, so much so that the program could not run without it.
-#FLOWED
 def filepath_finder(file_name):
     script_dir = os.path.dirname(os.path.abspath(__file__)) # returns the directory of a normalized absolutized version of THIS file
     filepath = os.path.join(script_dir, file_name) # concantates the file_name to the end of the pathway to this file.
     return filepath
 
-#FLOWED
 def main_menu(name, char_class, new_player, save_name):
     global gold
     while True:
@@ -326,7 +318,6 @@ def main_menu(name, char_class, new_player, save_name):
                 print("GOLD.")
                 gold += 50
 
-#FLOWED
 def notes(new_player, save_name):
     global gold, courses
     while True:
@@ -351,7 +342,6 @@ def notes(new_player, save_name):
             case "B":
                 return
 
-#FLOWED
 def note_revision(subject, save_name):
     global exp
     print()
@@ -405,7 +395,6 @@ def note_revision(subject, save_name):
             case "C":
                 return
 
-#FLOWED
 def course_edit(save_name):
     print()
     console.print(f"[A] Add Subject\n[B] Remove Subject\n[C] Go Back", style="important")
@@ -451,11 +440,11 @@ def quiz(new_player):
         case "D":
             subject = "english"
         case "E":
-            saves = list_save_files(True, "_questions.txt")
-            saves.remove("legal_studies") # should i have the program only show teacher made quizzes? and scrap the four pre-made ones?
-            for save in saves:
-                save = save.replace("_", " ")
-                print(f"- {save}")
+            quizzes = list_save_files(True, "_questions.txt")
+            quizzes.remove("legal_studies") # should i have the program only show teacher made quizzes? and scrap the four pre-made ones?
+            for quiz in quizzes:
+                quiz = quiz.replace("_", " ")
+                print(f"- {quiz}")
             subject = input("Which quiz would you like to do? ").strip().lower()
             subject = subject.replace(" ", "_")
         case "F":
@@ -494,21 +483,17 @@ def monster(dungeon_lvl):
         case 1:
             print("You enter the dungeon.")
             monster_list = ["Slime 🧪 ", "Zombie 🧟 ", "Skeleton 🩻 "]
-            monster_hp = 2
+            monster_hp = 3
         case 2:
             print("You delve deeper into the dungeon.")
             monster_list = ["Big Slime 🧪 ", "Big Zombie 🧟 ", "Big Skeleton 🩻 "]
-            monster_hp = 4
+            monster_hp = 5
         case 3:
             print("You open the doors to the final chamber.")
             monster_list = ["Dunston 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
             monster_hp = 10
-        case 4:
-            print("You cleared the Dungeon!")
     monster_name = random.choice(monster_list)
     print(f"A {monster_name} appears before you")
-    print_monster_hp = "🖤 "*monster_hp
-    print(f"{monster_name} HP: {print_monster_hp}")
     return monster_name, monster_hp
 
 def ask_question(subject, q_num):
@@ -522,24 +507,23 @@ def ask_question(subject, q_num):
     random.shuffle(shuffled_multiple_choice) # if a duplicate was not made, then the correct answer to all questions will be A, regardless of if thats true or not
     print(f"{q_num}. {question}")
     console.print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}", style="important")
-    while True:
-        answer = input("Answer: ").upper().strip()
-        clear()
-        match answer:
-            case "A":
-                answer = shuffled_multiple_choice[0]
-            case "B":
-                answer = shuffled_multiple_choice[1]
-            case "C":
-                answer = shuffled_multiple_choice[2]
-            case "D":
-                answer = shuffled_multiple_choice[3]
-        if answer == multiple_choice[correct_answer]: # matches the answers. possibly unnecessary to include [correct_answer]. could have just had [0]
-            correct = True
-        else:
-            correct = False
-        q_num += 1
-        return correct, q_num, subject_type
+    answer = input("Answer: ").upper().strip()
+    clear()
+    match answer:
+        case "A":
+            answer = shuffled_multiple_choice[0]
+        case "B":
+            answer = shuffled_multiple_choice[1]
+        case "C":
+            answer = shuffled_multiple_choice[2]
+        case "D":
+            answer = shuffled_multiple_choice[3]
+    if answer == multiple_choice[correct_answer]: # matches the answers. possibly unnecessary to include [correct_answer]. could have just had [0]
+        correct = True
+    else:
+        correct = False
+    q_num += 1
+    return correct, q_num, subject_type
 
 def load_questions(filename):
     with open(filename, "r") as file:
@@ -547,9 +531,12 @@ def load_questions(filename):
         if lines[0] == "stem": # checks to see if the first line is either stem or Humanities
             subject_type = "stem"
             lines.remove("stem")
-        elif lines[0] == "huma":
+        elif lines[0] == "humanity":
             subject_type = "Humanities"
-            lines.remove("huma")
+            lines.remove("humanities")
+        else:
+            print("Quiz Error.")
+            quiz(False)
         random_line = random.choice(lines) # randomly chooses one of these lines and saves it to a variable
         question, rest = random_line.split(":", 1) # splits this random variable into 2 variables, dividing it at the colon
         choices, correct_answer = rest.split("|") # further splits, creating 3 items in total: the qurestion, choices, and correct answer
@@ -562,23 +549,22 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
     global quiz_over
     if correct:
         console.print(f"You damaged {monster_name}", style="correct")
-        monster_hp = monster_hp - 1
+        monster_hp -= 1
         monster_slain = False
         if monster_hp <= 0: # less than or equal too
             dungeon_lvl += 1
             monster_slain = True
             if dungeon_lvl == 4:
                 quiz_over = True
-        print_monster_hp = "🖤 "*monster_hp
-        print(f"{monster_name} HP: {print_monster_hp}")
     else:
-        dmg = dungeon_lvl
-        temp_health -= dmg
-        console.print(f"The {monster_name} damaged you by {dmg} points.", style="incorrect")
+        temp_health -= dungeon_lvl
+        console.print(f"The {monster_name} damaged you by {dungeon_lvl} points.", style="incorrect")
         monster_slain = False
         if temp_health <= 0: # less than or equal too
             console.print(f"You were defeated by the {monster_name}.", style="incorrect")
             quiz_over = True
+    print_monster_hp = "🖤 "*monster_hp
+    print(f"{monster_name} HP: {print_monster_hp}")
     return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
 def dungeon_over(dungeon_lvl, q_num, subject_type):
@@ -591,6 +577,9 @@ def dungeon_over(dungeon_lvl, q_num, subject_type):
         elif subject_type == "stem":
             exp_modifier = q_num + dungeon_lvl*5 + stem_mod
             gold_modifier = round((q_num + dungeon_lvl*2 + stem_mod)/2)
+        else:
+            exp_modifier = 0
+            gold_modifier = 0
     else:
         console.print("The dungeon cleared you...", style="incorrect")
         # could possibly add the humanity/stem exp mods
@@ -601,7 +590,6 @@ def dungeon_over(dungeon_lvl, q_num, subject_type):
     gold += gold_modifier
 # end of quiz functions
 
-#FLOWED
 def shop(new_player):
     global gold, inventory
     while True:
@@ -657,8 +645,7 @@ def shop(new_player):
                                     break # send back to top of shop if user wishes to buy something else, cld be replaced with return to send them back to main
                                 else:
                                     break # send back to top of shop if user wishes to buy something else
-
-#FLOWED     
+     
 def purchasing(item_info):
     global gold, humanity_mod, stem_mod
     inventory.append(item_info[0])
@@ -667,7 +654,6 @@ def purchasing(item_info):
     stem_mod += int(item_info[3])
     print("Purchased!")
 
-# FLOWED
 def quit_game(name):
     print()
     confirmation = input("[Y/N] Are you sure you want to quit? ").upper().strip()
@@ -676,7 +662,6 @@ def quit_game(name):
         print()
         main()
 
-# FLOWED
 # saves the player's stats every time the main menu is accessed
 def save_game(name, char_class, save_name):
     global exp, level, max_health
