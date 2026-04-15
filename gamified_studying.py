@@ -197,15 +197,15 @@ def create_questions():
     while True:
         print()
         try:
-            question = input("Input Question: ").replace(",", "-").replace("'", "`") # adheres to _questions.txt formatting
+            question = input("Input Question: ").replace(",", "-").replace("'", "`").replace(":", "?") # adheres to _questions.txt formatting
         except EOFError: # raised when user inputs ctrl+z or ctrl+d, depending on their os
             break # terminates the while True loop
         else:
             question = question + ":" # more formatting
             quiz_question.append(question)
-            correct_answer = input("Correct answer: ").replace(",", "-").replace("'", "`")
-            correct_answer = " " + correct_answer
-            multiple_choice_questions.append(correct_answer)
+            correct_answer_index = input("Correct answer: ").replace(",", "-").replace("'", "`")
+            correct_answer_index = " " + correct_answer_index
+            multiple_choice_questions.append(correct_answer_index)
             for _ in range(3): # underscore is a placeholder variable with no real meaning
                 other_answer = input("Other answer: ").replace(",", "-").replace("'", "`")
                 multiple_choice_questions.append(other_answer)
@@ -466,7 +466,7 @@ def quiz_main(subject):
     temp_health = max_health # creates a temporary, modifiable variable for use in the dungeons
     while quiz_over == False:
         if monster_slain == True:
-            monster_name, monster_hp = monster(dungeon_lvl)
+            monster_name, monster_hp = monster_loader(dungeon_lvl)
         if dungeon_lvl == 3:
             print(f"The {monster_name} looks at you.")
         else:
@@ -475,9 +475,9 @@ def quiz_main(subject):
         quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health)
         print_hp = "❤️ "*temp_health
         print(f"HP: {print_hp}")
-    dungeon_over(dungeon_lvl, q_num, subject_type)
+    reward_calc(dungeon_lvl, q_num, subject_type)
 
-def monster(dungeon_lvl):
+def monster_loader(dungeon_lvl):
     print()
     match dungeon_lvl:
         case 1:
@@ -498,35 +498,35 @@ def monster(dungeon_lvl):
 
 def ask_question(subject, q_num):
     global exp
-    filename = f"{subject}_questions.txt"
-    question, choices, correct_answer, subject_type = load_questions(filename)
+    file_name = f"{subject}_questions.txt"
+    question, choices, correct_answer_index, subject_type = question_loader(file_name)
     print()
     choices = choices.replace('"', "").replace("[", "").replace("]", "").replace("'", "") # removes the formatting used in the actual text file.
-    multiple_choice = choices.split(",") # due to commas being used to split the 3 variables, this raises a bunch of errors if a comma is present IN the option itself
-    shuffled_multiple_choice = multiple_choice[:] # [:] creates a duplicate of the entire list.
-    random.shuffle(shuffled_multiple_choice) # if a duplicate was not made, then the correct answer to all questions will be A, regardless of if thats true or not
+    multiple_choice_answers = choices.split(",") # due to commas being used to split the 3 variables, this raises a bunch of errors if a comma is present IN the option itself
+    shuffled_multiple_choice_answers = multiple_choice_answers[:] # [:] creates a duplicate of the entire list.
+    random.shuffle(shuffled_multiple_choice_answers) # if a duplicate was not made, then the correct answer to all questions will be A, regardless of if thats true or not
     print(f"{q_num}. {question}")
-    console.print(f"[A]{shuffled_multiple_choice[0]}\n[B]{shuffled_multiple_choice[1]}\n[C]{shuffled_multiple_choice[2]}\n[D]{shuffled_multiple_choice[3]}", style="important")
-    answer = input("Answer: ").upper().strip()
+    console.print(f"[A]{shuffled_multiple_choice_answers[0]}\n[B]{shuffled_multiple_choice_answers[1]}\n[C]{shuffled_multiple_choice_answers[2]}\n[D]{shuffled_multiple_choice_answers[3]}", style="important")
+    option = input("Answer: ").upper().strip()
     clear()
-    match answer:
+    match option:
         case "A":
-            answer = shuffled_multiple_choice[0]
+            option = shuffled_multiple_choice_answers[0]
         case "B":
-            answer = shuffled_multiple_choice[1]
+            option = shuffled_multiple_choice_answers[1]
         case "C":
-            answer = shuffled_multiple_choice[2]
+            option = shuffled_multiple_choice_answers[2]
         case "D":
-            answer = shuffled_multiple_choice[3]
-    if answer == multiple_choice[correct_answer]: # matches the answers. possibly unnecessary to include [correct_answer]. could have just had [0]
+            option = shuffled_multiple_choice_answers[3]
+    if option == multiple_choice_answers[correct_answer_index]: # matches the answers. possibly unnecessary to include [correct_answer_index]. could have just had [0]
         correct = True
     else:
         correct = False
     q_num += 1
     return correct, q_num, subject_type
 
-def load_questions(filename):
-    with open(filename, "r") as file:
+def question_loader(file_name):
+    with open(file_name, "r") as file:
         lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
         if lines[0] == "stem": # checks to see if the first line is either stem or Humanities
             subject_type = "stem"
@@ -539,11 +539,11 @@ def load_questions(filename):
             quiz(False)
         random_line = random.choice(lines) # randomly chooses one of these lines and saves it to a variable
         question, rest = random_line.split(":", 1) # splits this random variable into 2 variables, dividing it at the colon
-        choices, correct_answer = rest.split("|") # further splits, creating 3 items in total: the qurestion, choices, and correct answer
+        choices, correct_answer_index = rest.split("|") # further splits, creating 3 items in total: the qurestion, choices, and correct answer
         question = question.strip() # removes unnecessary spaces
         choices = choices.strip()
-        correct_answer = int(correct_answer.strip()) # is an integer that always equals zero, so that it can be used for indexing
-    return question, choices, correct_answer, subject_type
+        correct_answer_index = int(correct_answer_index.strip()) # is an integer that always equals zero, so that it can be used for indexing
+    return question, choices, correct_answer_index, subject_type
 
 def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
     global quiz_over
@@ -567,7 +567,7 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
     print(f"{monster_name} HP: {print_monster_hp}")
     return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
 
-def dungeon_over(dungeon_lvl, q_num, subject_type):
+def reward_calc(dungeon_lvl, q_num, subject_type):
     global gold, exp, quiz_over, humanity_mod, stem_mod
     if dungeon_lvl == 4: # multiple ways to check if user beat the dungeons. i chose this one since it seems easiest
         console.print("You cleared the dungeon.", style="correct")
