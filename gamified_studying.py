@@ -156,7 +156,7 @@ def create_quiz():
     while True:
         subject_type = input("What type of subject is this? ").upper().strip()
         if subject_type == "A":
-            subject_type = "stem"
+            subject_type = "STEM"
             break
         elif subject_type == "B":
             subject_type = "humanity"
@@ -463,6 +463,7 @@ def quiz_main(subject):
     q_num = 1
     quiz_over = False
     monster_slain = True
+    correct_count = 0
     temp_health = max_health # creates a temporary, modifiable variable for use in the dungeons
     while quiz_over == False:
         if monster_slain == True:
@@ -472,10 +473,10 @@ def quiz_main(subject):
         else:
             print(f"The {monster_name} readies to attack.")
         correct, q_num, subject_type = ask_question(subject, q_num)
-        quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health)
+        quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health, correct_count = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health, correct_count)
         print_hp = "❤️ "*temp_health
         print(f"HP: {print_hp}")
-    reward_calc(dungeon_lvl, q_num, subject_type)
+    reward_calc(dungeon_lvl, q_num, subject_type, correct_count)
 
 def monster_loader(dungeon_lvl):
     print()
@@ -528,10 +529,10 @@ def ask_question(subject, q_num):
 def question_loader(file_name):
     with open(file_name, "r") as file:
         lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
-        if lines[0] == "stem": # checks to see if the first line is either stem or Humanities
-            subject_type = "stem"
-            lines.remove("stem")
-        elif lines[0] == "humanity":
+        if lines[0] == "STEM": # checks to see if the first line is either stem or Humanities
+            subject_type = "STEM"
+            lines.remove("STEM")
+        elif lines[0] == "humanities":
             subject_type = "Humanities"
             lines.remove("humanities")
         else:
@@ -545,12 +546,13 @@ def question_loader(file_name):
         correct_answer_index = int(correct_answer_index.strip()) # is an integer that always equals zero, so that it can be used for indexing
     return question, choices, correct_answer_index, subject_type
 
-def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
+def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health, correct_count):
     global quiz_over
     if correct:
         console.print(f"You damaged {monster_name}", style="correct")
         monster_hp -= 1
         monster_slain = False
+        correct_count += 1
         if monster_hp <= 0: # less than or equal too
             dungeon_lvl += 1
             monster_slain = True
@@ -560,21 +562,23 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health):
         temp_health -= dungeon_lvl
         console.print(f"The {monster_name} damaged you by {dungeon_lvl} points.", style="incorrect")
         monster_slain = False
+        correct_count += 0
         if temp_health <= 0: # less than or equal too
             console.print(f"You were defeated by the {monster_name}.", style="incorrect")
             quiz_over = True
     print_monster_hp = "🖤 "*monster_hp
     print(f"{monster_name} HP: {print_monster_hp}")
-    return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health
+    return quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health, correct_count
 
-def reward_calc(dungeon_lvl, q_num, subject_type):
+def reward_calc(dungeon_lvl, q_num, subject_type, correct_count):
     global gold, exp, quiz_over, humanity_mod, stem_mod
+    print(f"Correct Questions: {correct_count}")
     if dungeon_lvl == 4: # multiple ways to check if user beat the dungeons. i chose this one since it seems easiest
         console.print("You cleared the dungeon.", style="correct")
         if subject_type == "Humanities":
             exp_modifier = q_num + dungeon_lvl*5 + humanity_mod
             gold_modifier = round((q_num + dungeon_lvl*2 + humanity_mod)/2)
-        elif subject_type == "stem":
+        elif subject_type == "STEM":
             exp_modifier = q_num + dungeon_lvl*5 + stem_mod
             gold_modifier = round((q_num + dungeon_lvl*2 + stem_mod)/2)
         else:
