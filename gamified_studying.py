@@ -572,7 +572,6 @@ def battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health, cor
 
 def reward_calc(dungeon_lvl, q_num, subject_type, correct_count):
     global gold, exp, quiz_over, humanity_mod, stem_mod
-    print(f"Correct Questions: {correct_count}")
     if dungeon_lvl == 4: # multiple ways to check if user beat the dungeons. i chose this one since it seems easiest
         console.print("You cleared the dungeon.", style="correct")
         if subject_type == "Humanities":
@@ -589,6 +588,7 @@ def reward_calc(dungeon_lvl, q_num, subject_type, correct_count):
         # could possibly add the humanity/stem exp mods
         exp_modifier = round((q_num + dungeon_lvl*5)/2)
         gold_modifier = 0 # must be set for use in next few lines
+    print(f"Number of Questions Answered Correctly: {correct_count}")
     print(f"You earned {exp_modifier} EXP\nYou earned {gold_modifier} gold.")
     exp += exp_modifier
     gold += gold_modifier
