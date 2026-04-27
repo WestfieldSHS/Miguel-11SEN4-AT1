@@ -138,7 +138,7 @@ def teacher_menu():
                 subject = input("Which quiz do you want to remove? ").lower().strip()
                 if subject == "q":
                     teacher_menu() # return would return the user to the user_menu
-                subject = subject.replace(" ", "_")
+                subject = subject.replace(" ", "_") 
                 try:
                     os.remove(subject + "_questions.txt")
                 except OSError:
