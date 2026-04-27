@@ -314,9 +314,6 @@ def main_menu(name, char_class, new_player, save_name):
                 character_customisation(save_name)
             case "E":
                 quit_game(name)
-            case "BOOSTER":
-                print("GOLD.")
-                gold += 50
 
 def notes(new_player, save_name):
     global gold, courses
@@ -427,7 +424,7 @@ def quiz(new_player):
     print()
     if new_player:
         console.print("This is the [important]Dungeons[/important].\nHere you can take [important]quizzes[/important] on certain subjects and [important]level[/important] up.\n[important]Try it[/important].")
-    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Dive into the Legal Lagoon \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Teacher-Made Quizzes\n[F] Go Back", style="important")
+    console.print("[A] Descend into the Malevolent Mines of Mathematics\n[B] Navigate the Legal Labyrinth \n[C] Ascend into the Physics Peaks\n[D] Venture into the English Everglades\n[E] Explore Teacher-Made Quizzes\n[F] Go Back", style="important")
     option = input("What dungeon would you like to explore? ").upper().strip()
     clear()
     match option:
@@ -441,12 +438,18 @@ def quiz(new_player):
             subject = "english"
         case "E":
             quizzes = list_save_files(True, "_questions.txt")
-            quizzes.remove("legal_studies") # should i have the program only show teacher made quizzes? and scrap the four pre-made ones?
-            for quiz in quizzes:
-                quiz = quiz.replace("_", " ")
-                print(f"- {quiz}")
-            subject = input("Which quiz would you like to do? ").strip().lower()
-            subject = subject.replace(" ", "_")
+            quizzes.remove("legal_studies")
+            if not quizzes:
+                print("There are no teacher-made tests ready.")
+                subject = ""
+            else:
+                prefix_list = ["Dungeon of ", "Labyrinth of ", "Cave of ", "Tower of ", "Tomb of ", "House of "]
+                for quiz in quizzes:
+                    prefix = random.choice(prefix_list)
+                    quiz = quiz.replace("_", " ")
+                    print(f"- {prefix}{quiz.title()}")
+                subject = input("Which quiz would you like to do? ").strip().lower()
+                subject = subject.replace(" ", "_")
         case "F":
             return
         case _:
@@ -457,7 +460,6 @@ def quiz_main(subject):
     global monster_slain, max_health, quiz_over
     if not subject: # blank variable is False
         return
-    print()
     # re/sets all the necessary variables:
     dungeon_lvl = 1
     q_num = 1
@@ -466,6 +468,7 @@ def quiz_main(subject):
     correct_count = 0
     temp_health = max_health # creates a temporary, modifiable variable for use in the dungeons
     while quiz_over == False:
+        print()
         if monster_slain == True:
             monster_name, monster_hp = monster_loader(dungeon_lvl)
         if dungeon_lvl == 3:
@@ -479,7 +482,6 @@ def quiz_main(subject):
     reward_calc(dungeon_lvl, q_num, subject_type, correct_count)
 
 def monster_loader(dungeon_lvl):
-    print()
     match dungeon_lvl:
         case 1:
             print("You enter the dungeon.")

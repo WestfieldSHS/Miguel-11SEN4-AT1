@@ -1,0 +1,4 @@
+STEM
+Example of an Integer: [' 14', '1.4', 'Fourteen', 'False'] | 0
+Exaple of a Float: [' 1.4', '14', 'Fourteen', 'False'] | 0
+Example of a String: [' Fourteen', '1.4', '14', 'False'] | 0
