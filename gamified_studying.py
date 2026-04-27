@@ -85,7 +85,7 @@ def main():
                         if file.startswith(save_name):
                             os.remove(file) # removal of files such as "player_maths_notes.txt"
             case "D":
-                print("Authentication required.")
+                console.print("Authentication required.", style="important")
                 password = input("Password: ")
                 if password == "1234":
                     teacher_menu()
@@ -128,7 +128,7 @@ def teacher_menu():
             case "C":
                 quizzes = list_save_files(True, "_questions.txt")
                 if not quizzes: # if list is empty
-                    print("No quizzes made.")
+                    console.print("No quizzes made.", style="incorrect")
                 else:
                     print("Quizzes:")
                     for quiz in quizzes:
@@ -142,7 +142,7 @@ def teacher_menu():
                 try:
                     os.remove(subject + "_questions.txt")
                 except OSError:
-                    print("Quiz not found.")
+                    console.print("Quiz not found.", style="incorrect")
             case "Q":
                 main()
 
@@ -163,7 +163,7 @@ def create_quiz():
             break
     count = 0
     if subject in ["legal_studies", "physics", "maths", "english"]: # could be removed
-        print("Quizzes already made for these subjects.")
+        console.print("Quizzes already made for these subjects.", style="incorrect")
         return
     print("CTRL+Z/D to stop making the quiz.") # ctrl+z/d raises an EOFError when inputted. depends on mac/windows
     try:
@@ -323,7 +323,7 @@ def notes(new_player, save_name):
             console.print("This is the [important]Training Grounds[/important],\nHere you can make [important]notes[/important] on various subjects and [important]recall them[/important].\n[important]Try it[/important].")
         console.print("[A] Edit Courses\n[B] Go Back", style="important")
         if not len(courses):
-            print("You have no subjects. Add some!")
+            console.print("You have no subjects. Add some!", style="incorrect")
         else:
             print("Here are your subjects:")
             for unit in courses:
@@ -364,7 +364,7 @@ def note_revision(subject, save_name):
                     for concept, notes in note_dict.items(): # .items() returns the key and value of a dict as a tuple = (key1, value1), (key2, value2), etc
                         print(f"- {concept}: {notes}")
                 else:
-                    print("No notes yet.")
+                    console.print("No notes yet.", style="incorrect")
             case "B":
                 print("CTRL+Z/D to stop taking notes.\nType 'Remove', followed by the name of the concept, to remove it.")
                 while True:
@@ -380,7 +380,7 @@ def note_revision(subject, save_name):
                                 del note_dict[concept] # deletes it from the dictionary
                                 print(f"{concept} removed from notes.")
                             else:
-                                print("This concept is not in your notes.")
+                                console.print("This concept is not in your notes.", style="incorrect")
                         else:
                             concept_notes = input("Notes for concept: ").strip()
                             note_dict[concept] = concept_notes
@@ -440,7 +440,7 @@ def quiz(new_player):
             quizzes = list_save_files(True, "_questions.txt")
             quizzes.remove("legal_studies")
             if not quizzes:
-                print("There are no teacher-made tests ready.")
+                console.print("There are no teacher-made tests ready.", style="incorrect")
                 subject = ""
             else:
                 prefix_list = ["Dungeon of ", "Labyrinth of ", "Cave of ", "Tower of ", "Tomb of ", "House of "]
@@ -493,7 +493,7 @@ def monster_loader(dungeon_lvl):
             monster_hp = 5
         case 3:
             print("You open the doors to the final chamber.")
-            monster_list = ["Dunston 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
+            monster_list = ["Biggest Slime 🧪 ", "Biggest Zombie 🧟 ", "Biggest Skeleton 🩻 "]
             monster_hp = 10
     monster_name = random.choice(monster_list)
     print(f"A {monster_name} appears before you")
@@ -590,7 +590,7 @@ def reward_calc(dungeon_lvl, q_num, subject_type, correct_count):
         # could possibly add the humanity/stem exp mods
         exp_modifier = round((q_num + dungeon_lvl*5)/2)
         gold_modifier = 0 # must be set for use in next few lines
-    print(f"Number of Questions Answered Correctly: {correct_count}")
+    print(f"Number of Questions Answered Correctly: {correct_count}/{q_num}")
     print(f"You earned {exp_modifier} EXP\nYou earned {gold_modifier} gold.")
     exp += exp_modifier
     gold += gold_modifier
@@ -602,7 +602,7 @@ def shop(new_player):
         if new_player:
             console.print("This is the [important]Marketplace[/important].\nHere you can [important]purchase[/important] items with the [important]gold you get from the Dungeons[/important].")
             console.print("The Humanities stat [important]modifies[/important] how much how much [important]EXP[/important] and [important]Gold[/important] in Humanities dungeons\n(For Example, English or Legal Studies)")
-            console.print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
+            print("The STEM stat modifies how much EXP and Gold you earn in STEM dungeons.\n(For example, Maths and Physics)")
         # deals with csv files, or comma seperated value files.
         with open('11SEN_AT1_CSV.csv', encoding="UTF-8-sig") as csvfile: # encodes in UTF-8-sig which removes strange letters from the first cell
             print_shop_menu = from_csv(csvfile) # prints the csv file in a table
@@ -658,7 +658,7 @@ def purchasing(item_info):
     gold -= int(item_info[1])
     humanity_mod += int(item_info[2])
     stem_mod += int(item_info[3])
-    print("Purchased!")
+    console.print("Purchased!", style="correct")
 
 def quit_game(name):
     print()

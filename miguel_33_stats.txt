@@ -1,7 +1,7 @@
 Name: Miguel #33
 Class: Bard
 Level: 4
-Experience: 54
+Experience: 76
 Max HP: 8
 Gold: 90
 Humanities Expertise: 2
