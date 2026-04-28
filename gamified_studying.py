@@ -103,7 +103,7 @@ def list_save_files(remove_suffix, suffix): # does smth need to be removed, what
                 saves.append(file) # used in the teacher mode to properly open the saves  in read mode
     return saves
 
-# start of teacher specific functions
+# start of teacher view
 def teacher_menu():
     while True:
         print()
@@ -213,8 +213,9 @@ def create_questions():
             multiple_choice_questions.clear()
             print(quiz_question)
     return quiz_question
+# end of teacher view
 
-# start of player/student specific functions
+# start of player/student view
 def character_customisation(save_name):
     global level, exp, gold, courses, max_health, humanity_mod, stem_mod, inventory
     file_name = f"{save_name}_stats.txt" # this is where the program decides whether or not to create a new save file
