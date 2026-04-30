@@ -534,7 +534,7 @@ def question_loader(file_name):
         lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
         if lines[0] == "STEM": # checks to see if the first line is either stem or Humanities
             subject_type = "STEM"
-            lines.remove("STEM")
+            lines.remove("STEM") # since it is the list being modified, file does not need to be in write mode, and it doesnt change the file
         elif lines[0] == "humanities":
             subject_type = "Humanities"
             lines.remove("humanities")
@@ -627,6 +627,7 @@ def shop(new_player):
                     item = input("What would you like to purchase? ").title().strip()
                     item_length = len(item) # doesn't start at 0. starts at 1
                     for line in data:
+                        # if item == Maths Sword, item_length = 8. line, which is what item_length is being checked against, is something like "Maths Sword,30,0,1", which has an extra 7-8 digits.
                         if item_length+8 == len(line) or item_length+9 == len(line): # item_length is "item name" while line is: "item name,xx,x,x ", but it must also account for if the item price is 3 digits
                             if item == line[:item_length]: # though [:x] indexes from 0-(x-1), item_length is derived from len() which doesn't start counting from zero, so the full length can be indexed    
                                 item_info = list() # empty list
