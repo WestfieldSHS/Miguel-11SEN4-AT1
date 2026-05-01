@@ -161,7 +161,7 @@ def create_quiz():
         elif subject_type == "B":
             subject_type = "humanity"
             break
-    if subject in ["legal_studies"]: # could be removed
+    if subject in ["legal_studies", "physics", "maths", "english"]: # could be removed
         console.print("Quizzes already made for these subjects.", style="incorrect")
         return
     print("CTRL+Z/D to stop making the quiz.") # ctrl+z/d raises an EOFError when inputted. depends on mac/windows
@@ -191,15 +191,14 @@ def create_questions():
             break # terminates the while True loop
         else:
             question = question + ":" # more formatting
-            correct_answer_index = input("Correct answer: ").replace(",", "-").replace("'", "`")
-            correct_answer_index = " " + correct_answer_index
-            multiple_choice_questions.append(correct_answer_index)
+            correct_answer = input("Correct answer: ").replace(",", "-").replace("'", "`")
+            correct_answer = " " + correct_answer
+            multiple_choice_questions.append(correct_answer)
             for _ in range(3): # underscore is a placeholder variable with no real meaning
                 other_answer = input("Other answer: ").replace(",", "-").replace("'", "`")
                 multiple_choice_questions.append(other_answer)
             quiz_question.append(f"{question} {multiple_choice_questions} | 0") # adheres to formatting for indexing
             multiple_choice_questions.clear()
-            print(quiz_question)
     return quiz_question
 # end of teacher view
 
