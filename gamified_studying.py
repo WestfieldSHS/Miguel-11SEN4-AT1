@@ -161,7 +161,6 @@ def create_quiz():
         elif subject_type == "B":
             subject_type = "humanity"
             break
-    count = 0
     if subject in ["legal_studies"]: # could be removed
         console.print("Quizzes already made for these subjects.", style="incorrect")
         return
@@ -172,24 +171,14 @@ def create_quiz():
         with open(f"{subject}_questions.txt", "a") as file: # appends to the file that already exists
             file.write("\n") # does this to start on a fresh line in the already-made file
             quiz_question = create_questions()
-            for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
-                    if count <= 2: # 0 Yes so Write, 1 Yes so Write, 2 No so New line, repeat
-                        file.write(f"{line}")
-                        count += 1
-                    else:
-                        file.write(f"\n{line}") # new question, so creates a new line before writing
-                        count = 0
+            for line in quiz_question:
+                file.write(f"{line}\n")
     else:
         with open(f"{subject}_questions.txt", "w") as file: # new file, so opens in write mode to create and write in it
             file.write(f"{subject_type}\n") # doesn't create a new line, instead assigns the subject type
             quiz_question = create_questions()
-            for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
-                if count <= 2: # 0, 1, 2, new line, repeat
-                    file.write(f"{line}")
-                    count += 1
-                else:
-                    file.write(f"\n{line}") # new question, so creates a new line before writing
-                    count = 0
+            for line in quiz_question:
+                file.write(f"{line}\n")
         
 def create_questions():
     quiz_question = [] # list so that all 3 parts of the quiz question are written to the file together
@@ -202,14 +191,13 @@ def create_questions():
             break # terminates the while True loop
         else:
             question = question + ":" # more formatting
-            quiz_question.append(question)
             correct_answer_index = input("Correct answer: ").replace(",", "-").replace("'", "`")
             correct_answer_index = " " + correct_answer_index
             multiple_choice_questions.append(correct_answer_index)
             for _ in range(3): # underscore is a placeholder variable with no real meaning
                 other_answer = input("Other answer: ").replace(",", "-").replace("'", "`")
                 multiple_choice_questions.append(other_answer)
-            quiz_question.append(f" {multiple_choice_questions} | 0") # adheres to formatting for indexing
+            quiz_question.append(f"{question} {multiple_choice_questions} | 0") # adheres to formatting for indexing
             multiple_choice_questions.clear()
             print(quiz_question)
     return quiz_question
