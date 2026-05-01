@@ -162,7 +162,7 @@ def create_quiz():
             subject_type = "humanity"
             break
     count = 0
-    if subject in ["legal_studies", "physics", "maths", "english"]: # could be removed
+    if subject in ["legal_studies"]: # could be removed
         console.print("Quizzes already made for these subjects.", style="incorrect")
         return
     print("CTRL+Z/D to stop making the quiz.") # ctrl+z/d raises an EOFError when inputted. depends on mac/windows
@@ -173,7 +173,7 @@ def create_quiz():
             file.write("\n") # does this to start on a fresh line in the already-made file
             quiz_question = create_questions()
             for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
-                    if count < 2: # 0 Yes so Write, 1 Yes so Write, 2 No so New line, repeat
+                    if count <= 2: # 0 Yes so Write, 1 Yes so Write, 2 No so New line, repeat
                         file.write(f"{line}")
                         count += 1
                     else:
@@ -184,7 +184,7 @@ def create_quiz():
             file.write(f"{subject_type}\n") # doesn't create a new line, instead assigns the subject type
             quiz_question = create_questions()
             for line in quiz_question: # for each value in the quiz question aka the question, the list of multiple choice, and then the index
-                if count < 2: # 0, 1, 2, new line, repeat
+                if count <= 2: # 0, 1, 2, new line, repeat
                     file.write(f"{line}")
                     count += 1
                 else:
@@ -470,13 +470,13 @@ def quiz_main(subject):
     temp_health = max_health # creates a temporary, modifiable variable for use in the dungeons
     while quiz_over == False:
         print()
+        correct, q_num, subject_type = ask_question(subject, q_num)
         if monster_slain == True:
             monster_name, monster_hp = monster_loader(dungeon_lvl)
         if dungeon_lvl == 3:
             print(f"The {monster_name} looks at you.")
         else:
             print(f"The {monster_name} readies to attack.")
-        correct, q_num, subject_type = ask_question(subject, q_num)
         quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health, correct_count = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health, correct_count)
         print_hp = "❤️ "*temp_health
         print(f"HP: {print_hp}")
@@ -530,8 +530,12 @@ def ask_question(subject, q_num):
     return correct, q_num, subject_type
 
 def question_loader(file_name):
-    with open(file_name, "r") as file:
-        lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
+    try:
+        with open(file_name, "r") as file:
+            lines = file.read().splitlines() # returns a list that contains all loaded file's lines as seperate values
+    except FileNotFoundError:
+        quiz(False)
+    else:
         if lines[0] == "STEM": # checks to see if the first line is either stem or Humanities
             subject_type = "STEM"
             lines.remove("STEM") # since it is the list being modified, file does not need to be in write mode, and it doesnt change the file
