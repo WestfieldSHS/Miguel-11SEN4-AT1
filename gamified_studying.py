@@ -427,6 +427,7 @@ def quiz(new_player):
         case "E":
             quizzes = list_save_files(True, "_questions.txt")
             quizzes.remove("legal_studies")
+            quizzes.remove("physics")
             if not quizzes:
                 console.print("There are no teacher-made tests ready.", style="incorrect")
                 subject = ""
@@ -457,13 +458,13 @@ def quiz_main(subject):
     temp_health = max_health # creates a temporary, modifiable variable for use in the dungeons
     while quiz_over == False:
         print()
-        correct, q_num, subject_type = ask_question(subject, q_num)
         if monster_slain == True:
             monster_name, monster_hp = monster_loader(dungeon_lvl)
         if dungeon_lvl == 3:
             print(f"The {monster_name} looks at you.")
         else:
             print(f"The {monster_name} readies to attack.")
+        correct, q_num, subject_type = ask_question(subject, q_num)
         quiz_over, monster_hp, monster_slain, dungeon_lvl, temp_health, correct_count = battle_calc(monster_name, monster_hp, dungeon_lvl, correct, temp_health, correct_count)
         print_hp = "❤️ "*temp_health
         print(f"HP: {print_hp}")
